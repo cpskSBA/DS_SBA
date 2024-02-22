@@ -1,0 +1,59 @@
+name: 'prod'
+
+on:
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - 'v**'
+      - 'build-upper'
+
+defaults:
+  run:
+    shell: 'bash'
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: 'us-east-1'
+  AWS_DEFAULT_REGION: 'us-east-1'
+  AWS_ECR_REGISTRY_ID: '222484291001'
+  WORKSPACE: 'prod'
+
+jobs:
+  dashboard:
+    runs-on: 'ubuntu-latest'
+    environment: 'prod'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Connecting to AWS using OIDC'
+        uses: 'aws-actions/configure-aws-credentials@v2'
+        with:
+          role-to-assume: ${{ secrets.OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 'Connecting to ECR'
+        uses: 'aws-actions/amazon-ecr-login@v1'
+        id: 'ecr-login'
+        with:
+          registries: ${{ env.AWS_ECR_REGISTRY_ID }}
+
+      - name: 'Building Container'
+        uses: './.github/actions/ecr'
+        with:
+          image: '${{ steps.ecr-login.outputs.registry }}/certify/datahub-dashboard' # TODO: This needs to be fixed. Single ECR repositories using - inbetween. Needs consistency. Terraform code is set to use certify/datahub-dashboard but a tf plan shows its currently using certify/datahub-dashboard-wfe?
+
+      # Commented out for now. Code will be relocated from certify-datahub to this repository in the future.
+      - name: 'Install Terraform 1.5.2'
+        uses: 'hashicorp/setup-terraform@v2'
+        with:
+          terraform_version: '1.5.2'
+
+      - name: 'Deploying Service'
+        uses: './.github/actions/terraform'
+        with:
+          workspace: ${{ env.WORKSPACE }} 

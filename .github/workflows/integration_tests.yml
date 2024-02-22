@@ -1,0 +1,56 @@
+name: 'Integration Tests'
+on:
+  push:
+    branches: # run test against all branches
+      - '**'
+    tags-ignore: # ignore all tags, manager should know if the commit being tagged is stable
+      - '**'
+
+defaults:
+  run:
+    shell: 'bash'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build_dashboard:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Build Dashboard'
+        run: |
+          docker image build --pull -f Dockerfile -t datahub-dashboard:test .
+
+  #terraform_format:
+  #  runs-on: 'ubuntu-latest'
+  #  steps:
+  #    - name: 'Checkout'
+  #      uses: 'actions/checkout@v3'
+
+  #    - name: 'Install Terraform 1.5.2'
+  #      uses: 'hashicorp/setup-terraform@v2'
+  #      with:
+  #        terraform_version: '1.5.2'
+
+  #    - name: 'Terraform Format Dashboard'
+  #      run: |
+  #        cd terraform/
+  #        terraform fmt -check -recursive
+
+  #    # To run a terraform validate the project must be initialized, but we cannot use AWS credentials for integraton tests.
+  #    # Remove the s3_backend.tf so that the project state will be initialized on the local container.
+  #    - name: 'Terraform Validate'
+  #      run: |
+  #        cd terraform/
+  #        rm s3_backend.tf
+  #        terraform init -input=false
+  #        terraform workspace new demo
+  #        terraform validate
+  #        terraform workspace new stg
+  #        terraform validate
+  #        terraform workspace new prod
+  #        terraform validate
