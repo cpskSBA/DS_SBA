@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from snowflake.snowpark.context import get_active_session
 import numpy as np
-import time
+from snowflake.connector import connect
 
 
 page_title= "Small Business Administration Scorecard"
@@ -32,16 +32,146 @@ dolcols=["TOTAL_SB_ACT_ELIGIBLE_DOLLARS","SMALL_BUSINESS_DOLLARS","SDB_DOLLARS",
 # Mapping the renaming of the dollar amount columns
 dolcols_rename=["Total$","SmallBusiness$","SDB$","WOSB$","HUBZone$","SDVOSB$","8(a)$"]
 
+# con = connect(**st.secrets.snowflake_credentials)
+# cursor = con.cursor()
+#%%
+# @st.cache_resource
+# def get_data (query, params=None):
+#     if params:
+#         cursor.execute(query, params)
+#     else: 
+#         cursor.execute(query)
+#     results = cursor.fetch_pandas_all()
+#     return results
+
 #%%
 @st.cache_data
 def get_data():
     connection_parameters = st.secrets.snowflake_credentials
     global session
     session = sp.Session.builder.configs(connection_parameters).create()
-    data = session.table("TMP_SBA_SCORECARD_DASHBOARD_NEW")
+    data = session.table("TMP_SBA_SCORECARD_DASHBOARD_NEW_2")
     data =data.to_pandas()
     return data
     
+# #%%
+# def filter_sidebar(data):
+#     st.sidebar.header("Choose Your Filter: ")
+    
+#     #Sort by State Alphabetical Order
+#     data = data.dropna(subset='NAICS').sort_values('VENDOR_ADDRESS_STATE_NAME')
+    
+#     #Create a filter for state
+#     state=st.sidebar.multiselect("State",data['VENDOR_ADDRESS_STATE_NAME'].dropna().unique())
+    
+#     if not state:
+#         data2=data.copy()
+#         subheader_text=""
+#     else:
+#         data2=data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
+#         subheader_text =f"State: {', '.join(state)}"
+
+#     #Create a filter for SBA Region and District office
+#     sba_regions =sorted(data2['SBA_REGION'].dropna().unique(), key =lambda x: int(x.split(' ')[-1]))
+
+#     selected_sba_regions = st.sidebar.multiselect("SBA Region",sba_regions)
+#     if not selected_sba_regions:
+#         data2=data2.copy()
+#         subheader_text_region=""
+#     else:
+#         data2 = data2[data2["SBA_REGION"].isin(selected_sba_regions)]
+#         subheader_text_region =f"{', '.join(selected_sba_regions)}"
+
+#     # Create a filter by SBA District
+#     sba_districts = st.sidebar.multiselect("SBA District Office", sorted(data2['SBA_DISTRICT_OFFICE'].dropna().unique()))
+#     if not sba_districts:
+#         data2=data2.copy()
+#         subheader_text_district=""
+#     else:
+#         data2 = data2[data2["SBA_DISTRICT_OFFICE"].isin(sba_districts)]
+#         subheader_text_district =f"SBA District: {', '.join(sba_districts)}" 
+    
+#     #Create a Filter by Department
+#     department=st.sidebar.multiselect("Department", sorted(data2['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
+#     if not department:
+#         data3=data2.copy()   
+#     else:
+#         data3=data2[data2["FUNDING_DEPARTMENT_NAME"].isin(department)]
+#         department_text=f"Department: {', '.join(department)}"
+        
+#     #Create a filter by Agency
+#     agency=st.sidebar.multiselect("Agency", sorted(data3['FUNDING_AGENCY_NAME'].dropna().unique()))
+#     if not agency:
+#         data4=data3.copy()
+#     else:
+#         data4=data3[data3["FUNDING_AGENCY_NAME"].isin(agency)]
+   
+#     #Create filter for NAICS and PSC code
+#     filter_choice=st.sidebar.radio("Select Filter",["NAICS Code","PSC Code"])
+#     if filter_choice == 'NAICS Code':
+#         codes=st.sidebar.multiselect('NAICS Code', sorted(data4['NAICS'].dropna().unique()))
+#         naics_filter =data4['NAICS'].isin(codes)
+#         psc_filter=True
+#     else:
+#         psc_codes =data4['PSC'].dropna().unique()
+#         psc_codes = [code for code in psc_codes if code != "N/A: N/A"]
+#         codes = st.sidebar.multiselect("PSC Code",sorted(psc_codes))
+#         codes_upper = [code.upper() for code in codes]
+#         psc_filter=data4['PSC'].str.upper().isin(codes_upper)
+#         naics_filter=True
+
+#     #Combine Subheader
+#     combined_subheader = f"{subheader_text} {subheader_text_region} {subheader_text_district}"
+#     st.subheader(combined_subheader)
+ 
+#     #Create filter for State, Depatrment and Agency
+#     #NO selection
+#     if not state and not department and not agency and not codes:
+#         show_df=data
+    
+#     #1 Selection
+#     #Select State
+#     elif not department and not agency and not codes:
+#         show_df = data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
+#     #Select Department
+#     elif not state and not agency and not codes:
+#         show_df = data[data["FUNDING_DEPARTMENT_NAME"].isin(department)]
+#     #Select Agency
+#     elif not state and not department and not codes:
+#         show_df = data[data["FUNDING_AGENCY_NAME"].isin(agency)]
+   
+#     # 3 selections
+#     elif department and agency and codes:
+#         show_df= data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
+#     elif state and agency and codes:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
+#     elif state and department and codes:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department) & naics_filter & psc_filter]
+#     elif state and department and agency:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)& data4['FUNDING_AGENCY_NAME'].isin(agency)]
+
+#     # 2 Selections
+#     #state
+#     elif state and department:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)]
+#     elif state and agency:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
+#     elif state and codes:
+#         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & naics_filter & psc_filter]
+
+#     #department
+#     elif department and agency:
+#         show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
+#     elif department and codes:
+#         show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & naics_filter & psc_filter]
+
+#     #agency  
+#     elif agency and codes:
+#         show_df = data4[data['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
+#     else:
+#         show_df =data4[naics_filter & psc_filter]  
+#     return show_df
+
 #%%
 def filter_sidebar(data):
     st.sidebar.header("Choose Your Filter: ")
@@ -100,13 +230,13 @@ def filter_sidebar(data):
         codes=st.sidebar.multiselect('NAICS Code', sorted(data4['NAICS'].dropna().unique()))
         naics_filter =data4['NAICS'].isin(codes)
         psc_filter=True
-    else:
-        psc_codes =data4['PSC'].dropna().unique()
-        psc_codes = [code for code in psc_codes if code != "N/A: N/A"]
-        codes = st.sidebar.multiselect("PSC Code",sorted(psc_codes))
-        codes_upper = [code.upper() for code in codes]
-        psc_filter=data4['PSC'].str.upper().isin(codes_upper)
-        naics_filter=True
+    # else:
+    #     psc_codes =data4['PSC'].dropna().unique()
+    #     psc_codes = [code for code in psc_codes if code != "N/A: N/A"]
+    #     codes = st.sidebar.multiselect("PSC Code",sorted(psc_codes))
+    #     codes_upper = [code.upper() for code in codes]
+    #     psc_filter=data4['PSC'].str.upper().isin(codes_upper)
+    #     naics_filter=True
 
     #Combine Subheader
     combined_subheader = f"{subheader_text} {subheader_text_region} {subheader_text_district}"
@@ -161,12 +291,18 @@ def filter_sidebar(data):
     return show_df
 
 #%%
+# @st.cache_data
+# def group_data_year():
+#     year_df = get_data("SELECT * FROM TMP_SBA_SCORECARD_DASHBOARD_NEW")
+#     year_df = year_.squeeze().astype(int).sort_values().tolist()
+#     return years
+
+#%%
 @st.cache_data
 def group_data_year(show_df):
     year_df = show_df.groupby(['FISCAL_YEAR'],as_index=False)[dolcols].sum()
     doldict={"TOTAL_SB_ACT_ELIGIBLE_DOLLARS":"Total$","SMALL_BUSINESS_DOLLARS":"SmallBusiness$","SDB_DOLLARS":"SDB$","WOSB_DOLLARS":"WOSB$","CER_HUBZONE_SB_DOLLARS":"HUBZone$","SRDVOB_DOLLARS":"SDVOSB$","EIGHT_A_PROCEDURE_DOLLARS":"8(a)$"}
     year_df=year_df.rename(columns=doldict)
-
     return year_df
 
 def display_chart(data, is_percentage):
@@ -233,7 +369,7 @@ def expander(show_df):
             doldict = {"TOTAL_SB_ACT_ELIGIBLE_DOLLARS": "Total$", "SMALL_BUSINESS_DOLLARS": "SmallBusiness$", "SDB_DOLLARS": "SDB$",
                        "WOSB_DOLLARS": "WOSB$", "CER_HUBZONE_SB_DOLLARS": "HUBZone$", "SRDVOB_DOLLARS": "SDVOSB$",
                        "EIGHT_A_PROCEDURE_DOLLARS": "8(a)$", 'FISCAL_YEAR': 'Fiscal Year', 'VENDOR_ADDRESS_STATE_NAME': 'Vendor State',
-                       'FUNDING_DEPARTMENT_NAME': 'Department', 'FUNDING_AGENCY_NAME': 'Agency', 'PSC': 'PSC Code', 'NAICS': 'NAICS Code'}
+                       'FUNDING_DEPARTMENT_NAME': 'Department', 'FUNDING_AGENCY_NAME': 'Agency', 'NAICS': 'NAICS Code'}
             detailed_df = detailed_df.rename(columns=doldict)
             detailed_df[dolcols_rename] = detailed_df[dolcols_rename].apply(lambda x: round(x,2))  # Round to 2 decimal places
             percent_df = detailed_df.iloc[:, 7:].div(detailed_df.iloc[:, 6], axis=0).multiply(100)
