@@ -32,17 +32,6 @@ dolcols=["TOTAL_SB_ACT_ELIGIBLE_DOLLARS","SMALL_BUSINESS_DOLLARS","SDB_DOLLARS",
 # Mapping the renaming of the dollar amount columns
 dolcols_rename=["Total$","SmallBusiness$","SDB$","WOSB$","HUBZone$","SDVOSB$","8(a)$"]
 
-# con = connect(**st.secrets.snowflake_credentials)
-# cursor = con.cursor()
-#%%
-# @st.cache_resource
-# def get_data (query, params=None):
-#     if params:
-#         cursor.execute(query, params)
-#     else: 
-#         cursor.execute(query)
-#     results = cursor.fetch_pandas_all()
-#     return results
 
 #%%
 @st.cache_data
@@ -52,6 +41,7 @@ def get_data():
     session = sp.Session.builder.configs(connection_parameters).create()
     data = session.table("TMP_SBA_SCORECARD_DASHBOARD_NEW_2")
     data =data.to_pandas()
+    st.write()
     return data
     
 # #%%
@@ -224,12 +214,12 @@ def filter_sidebar(data):
     else:
         data4=data3[data3["FUNDING_AGENCY_NAME"].isin(agency)]
    
-    #Create filter for NAICS and PSC code
-    filter_choice=st.sidebar.radio("Select Filter",["NAICS Code","PSC Code"])
-    if filter_choice == 'NAICS Code':
-        codes=st.sidebar.multiselect('NAICS Code', sorted(data4['NAICS'].dropna().unique()))
-        naics_filter =data4['NAICS'].isin(codes)
-        psc_filter=True
+    # #Create filter for NAICS and PSC code
+    # filter_choice=st.sidebar.radio("Select Filter",["NAICS Code","PSC Code"])
+    # if filter_choice == 'NAICS Code':
+    #     codes=st.sidebar.multiselect('NAICS Code', sorted(data4['NAICS'].dropna().unique()))
+    #     naics_filter =data4['NAICS'].isin(codes)
+    #     psc_filter=True
     # else:
     #     psc_codes =data4['PSC'].dropna().unique()
     #     psc_codes = [code for code in psc_codes if code != "N/A: N/A"]
@@ -237,6 +227,12 @@ def filter_sidebar(data):
     #     codes_upper = [code.upper() for code in codes]
     #     psc_filter=data4['PSC'].str.upper().isin(codes_upper)
     #     naics_filter=True
+        
+    naics=st.sidebar.multiselect("NAICS Code", sorted(data4['NAICS'].dropna().unique()))
+    if not naics:
+        data5= data4.copy()
+    else:
+        data5=data4[data4["NAICS"].isin(naics)]
 
     #Combine Subheader
     combined_subheader = f"{subheader_text} {subheader_text_region} {subheader_text_district}"
@@ -244,27 +240,27 @@ def filter_sidebar(data):
  
     #Create filter for State, Depatrment and Agency
     #NO selection
-    if not state and not department and not agency and not codes:
+    if not state and not department and not agency and not naics:
         show_df=data
     
     #1 Selection
     #Select State
-    elif not department and not agency and not codes:
+    elif not department and not agency and not naics:
         show_df = data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
     #Select Department
-    elif not state and not agency and not codes:
+    elif not state and not agency and not naics:
         show_df = data[data["FUNDING_DEPARTMENT_NAME"].isin(department)]
     #Select Agency
-    elif not state and not department and not codes:
+    elif not state and not department and not naics:
         show_df = data[data["FUNDING_AGENCY_NAME"].isin(agency)]
    
     # 3 selections
-    elif department and agency and codes:
-        show_df= data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
-    elif state and agency and codes:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
-    elif state and department and codes:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department) & naics_filter & psc_filter]
+    elif department and agency and naics:
+        show_df= data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
+    elif state and agency and naics:
+        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
+    elif state and department and naics:
+        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['NAICS'].isin(naics)]
     elif state and department and agency:
         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)& data4['FUNDING_AGENCY_NAME'].isin(agency)]
 
@@ -274,20 +270,20 @@ def filter_sidebar(data):
         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)]
     elif state and agency:
         show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
-    elif state and codes:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & naics_filter & psc_filter]
+    elif state and naics:
+        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['NAICS'].isin(naics)]
 
     #department
     elif department and agency:
         show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
-    elif department and codes:
-        show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & naics_filter & psc_filter]
+    elif department and naics:
+        show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['NAICS'].isin(naics)]
 
     #agency  
-    elif agency and codes:
-        show_df = data4[data['FUNDING_AGENCY_NAME'].isin(agency) & naics_filter & psc_filter]
+    elif agency and naics:
+        show_df = data4[data['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
     else:
-        show_df =data4[naics_filter & psc_filter]  
+        show_df =data4['NAICS'].isin(naics)
     return show_df
 
 #%%
@@ -375,7 +371,7 @@ def expander(show_df):
             percent_df = detailed_df.iloc[:, 7:].div(detailed_df.iloc[:, 6], axis=0).multiply(100)
             percent_df.columns = percent_df.columns.str.replace("$", "%", regex=False)
             merged_df=pd.merge(detailed_df,percent_df,left_index=True, right_index=True)
-            merged_df=merged_df[['Fiscal Year', 'Vendor State', 'Department', 'Agency', 'PSC Code','NAICS Code', 'Total$', 'SmallBusiness$','SmallBusiness%','SDB$','SDB%', 'WOSB$','WOSB%','HUBZone$','HUBZone%','SDVOSB$','SDVOSB%','8(a)$','8(a)%']]
+            merged_df=merged_df[['Fiscal Year', 'Vendor State', 'Department', 'Agency','NAICS Code', 'Total$', 'SmallBusiness$','SmallBusiness%','SDB$','SDB%', 'WOSB$','WOSB%','HUBZone$','HUBZone%','SDVOSB$','SDVOSB%','8(a)$','8(a)%']]
             st.dataframe(merged_df)
             
             #To Download Data
@@ -383,7 +379,7 @@ def expander(show_df):
             st.download_button("Download Data", data=csv, file_name="detailed_data.csv", mime="text/csv",
                                help='Click here to download the data as a CSV file')
     else:
-        st.warning("To view a detailed dataset with columns such as Fiscal Year, State, Department, Agency,NAICS,and PSC code, please narrow down the options using the filters on the left.")
+        st.warning("To view a detailed dataset with columns such as Fiscal Year, State, Department, Agency,and NAICS please narrow down the options using the filters on the left.")
 
 if __name__ == "__main__":
     st.header(page_title)
