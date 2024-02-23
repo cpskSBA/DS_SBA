@@ -212,20 +212,6 @@ def filter_sidebar(data):
         data4=data3.copy()
     else:
         data4=data3[data3["FUNDING_AGENCY_NAME"].isin(agency)]
-   
-    # #Create filter for NAICS and PSC code
-    # filter_choice=st.sidebar.radio("Select Filter",["NAICS Code","PSC Code"])
-    # if filter_choice == 'NAICS Code':
-    #     codes=st.sidebar.multiselect('NAICS Code', sorted(data4['NAICS'].dropna().unique()))
-    #     naics_filter =data4['NAICS'].isin(codes)
-    #     psc_filter=True
-    # else:
-    #     psc_codes =data4['PSC'].dropna().unique()
-    #     psc_codes = [code for code in psc_codes if code != "N/A: N/A"]
-    #     codes = st.sidebar.multiselect("PSC Code",sorted(psc_codes))
-    #     codes_upper = [code.upper() for code in codes]
-    #     psc_filter=data4['PSC'].str.upper().isin(codes_upper)
-    #     naics_filter=True
         
     naics=st.sidebar.multiselect("NAICS Code", sorted(data4['NAICS'].dropna().unique()))
     if not naics:
@@ -284,13 +270,6 @@ def filter_sidebar(data):
     else:
         show_df =data4['NAICS'].isin(naics)
     return show_df
-
-#%%
-# @st.cache_data
-# def group_data_year():
-#     year_df = get_data("SELECT * FROM TMP_SBA_SCORECARD_DASHBOARD_NEW")
-#     year_df = year_.squeeze().astype(int).sort_values().tolist()
-#     return years
 
 #%%
 @st.cache_data
@@ -355,6 +334,7 @@ def download_data(year_df,year_df_pct):
     year_df=year_df.set_index('FISCAL_YEAR')
     st.write(year_df_pct.columns)
     merge_df= pd.merge(year_df,year_df_pct, left_index=True, right_index=True)
+    st.write(merge_df.columns)
     merge_df = merge_df[["Total$","SmallBusiness$","SmallBusiness%","SDB$","SDB%","WOSB$","WOSB%","HUBZone$","HUBZone%","SDVOSB$","SDVOSB%","8(a)$","8(a)%"]]
     st.download_button(label="Download Data",data=merge_df.to_csv(),file_name="scorecard.csv")
 
