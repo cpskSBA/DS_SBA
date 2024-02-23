@@ -241,34 +241,34 @@ def filter_sidebar(data):
    
     # 3 selections
     elif department and agency and naics:
-        show_df= data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
+        show_df= data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
     elif state and agency and naics:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
     elif state and department and naics:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['NAICS'].isin(naics)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['NAICS'].isin(naics)]
     elif state and department and agency:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)& data4['FUNDING_AGENCY_NAME'].isin(agency)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department)& data5['FUNDING_AGENCY_NAME'].isin(agency)]
 
     # 2 Selections
     #state
     elif state and department:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_DEPARTMENT_NAME'].isin(department)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department)]
     elif state and agency:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_AGENCY_NAME'].isin(agency)]
     elif state and naics:
-        show_df = data4[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data4['NAICS'].isin(naics)]
+        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['NAICS'].isin(naics)]
 
     #department
     elif department and agency:
-        show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['FUNDING_AGENCY_NAME'].isin(agency)]
+        show_df = data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['FUNDING_AGENCY_NAME'].isin(agency)]
     elif department and naics:
-        show_df = data4[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data4['NAICS'].isin(naics)]
+        show_df = data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['NAICS'].isin(naics)]
 
     #agency  
     elif agency and naics:
-        show_df = data4[data['FUNDING_AGENCY_NAME'].isin(agency) & data4['NAICS'].isin(naics)]
+        show_df = data5[data['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
     else:
-        show_df =data4['NAICS'].isin(naics)
+        show_df =data5['NAICS'].isin(naics)
     return show_df
 
 #%%
@@ -332,9 +332,9 @@ def table_percent(year_df):
 
 def download_data(year_df,year_df_pct):
     year_df=year_df.set_index('FISCAL_YEAR')
-    st.write(year_df_pct.columns)
     merge_df= pd.merge(year_df,year_df_pct, left_index=True, right_index=True)
     st.write(merge_df.columns)
+    
     merge_df = merge_df[["Total$","SmallBusiness$","SmallBusiness%","SDB$","SDB%","WOSB$","WOSB%","HUBZone$","HUBZone%","SDVOSB$","SDVOSB%","8(a)$","8(a)%"]]
     st.download_button(label="Download Data",data=merge_df.to_csv(),file_name="scorecard.csv")
 
