@@ -41,7 +41,6 @@ def get_data():
     session = sp.Session.builder.configs(connection_parameters).create()
     data = session.table("TMP_SBA_SCORECARD_DASHBOARD_NEW_2")
     data =data.to_pandas()
-    st.write()
     return data
     
 # #%%
@@ -361,7 +360,7 @@ def download_data(year_df,year_df_pct):
 def expander(show_df):
     if len(show_df) <= 262144:
         with st.expander("CLICK HERE TO VIEW DETAILED DATA (INCLUDING ALL THE COLUMNS LOCATED ON THE LEFT FILTER).", expanded=False):
-            detailed_df = show_df.groupby(['FISCAL_YEAR', 'VENDOR_ADDRESS_STATE_NAME', 'FUNDING_DEPARTMENT_NAME', 'FUNDING_AGENCY_NAME', 'PSC', 'NAICS'], as_index=False)[dolcols].sum()
+            detailed_df = show_df.groupby(['FISCAL_YEAR', 'VENDOR_ADDRESS_STATE_NAME', 'FUNDING_DEPARTMENT_NAME', 'FUNDING_AGENCY_NAME','NAICS'], as_index=False)[dolcols].sum()
             doldict = {"TOTAL_SB_ACT_ELIGIBLE_DOLLARS": "Total$", "SMALL_BUSINESS_DOLLARS": "SmallBusiness$", "SDB_DOLLARS": "SDB$",
                        "WOSB_DOLLARS": "WOSB$", "CER_HUBZONE_SB_DOLLARS": "HUBZone$", "SRDVOB_DOLLARS": "SDVOSB$",
                        "EIGHT_A_PROCEDURE_DOLLARS": "8(a)$", 'FISCAL_YEAR': 'Fiscal Year', 'VENDOR_ADDRESS_STATE_NAME': 'Vendor State',
