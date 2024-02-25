@@ -183,41 +183,41 @@ def filter_sidebar(data):
 
     selected_sba_regions = st.sidebar.multiselect("SBA Region",sba_regions)
     if not selected_sba_regions:
-        data2=data2.copy()
+        data3=data2.copy()
         subheader_text_region=""
     else:
-        data2 = data2[data2["SBA_REGION"].isin(selected_sba_regions)]
+        data3 = data2[data2["SBA_REGION"].isin(selected_sba_regions)]
         subheader_text_region =f"{', '.join(selected_sba_regions)}"
 
     # Create a filter by SBA District
-    sba_districts = st.sidebar.multiselect("SBA District Office", sorted(data2['SBA_DISTRICT_OFFICE'].dropna().unique()))
+    sba_districts = st.sidebar.multiselect("SBA District Office", sorted(data3['SBA_DISTRICT_OFFICE'].dropna().unique()))
     if not sba_districts:
-        data2=data2.copy()
+        data4=data3.copy()
         subheader_text_district=""
     else:
-        data2 = data2[data2["SBA_DISTRICT_OFFICE"].isin(sba_districts)]
+        data4 = data3[data3["SBA_DISTRICT_OFFICE"].isin(sba_districts)]
         subheader_text_district =f"SBA District: {', '.join(sba_districts)}" 
     
     #Create a Filter by Department
-    department=st.sidebar.multiselect("Department", sorted(data2['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
+    department=st.sidebar.multiselect("Department", sorted(data4['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
     if not department:
-        data3=data2.copy()   
+        data5=data4.copy()   
     else:
-        data3=data2[data2["FUNDING_DEPARTMENT_NAME"].isin(department)]
+        data5=data4[data4["FUNDING_DEPARTMENT_NAME"].isin(department)]
         department_text=f"Department: {', '.join(department)}"
         
     #Create a filter by Agency
-    agency=st.sidebar.multiselect("Agency", sorted(data3['FUNDING_AGENCY_NAME'].dropna().unique()))
+    agency=st.sidebar.multiselect("Agency", sorted(data5['FUNDING_AGENCY_NAME'].dropna().unique()))
     if not agency:
-        data4=data3.copy()
+        data6=data5.copy()
     else:
-        data4=data3[data3["FUNDING_AGENCY_NAME"].isin(agency)]
+        data6=data5[data5["FUNDING_AGENCY_NAME"].isin(agency)]
         
-    naics=st.sidebar.multiselect("NAICS Code", sorted(data4['NAICS'].dropna().unique()))
+    naics=st.sidebar.multiselect("NAICS Code", sorted(data6['NAICS'].dropna().unique()))
     if not naics:
-        data5= data4.copy()
+        data7= data6.copy()
     else:
-        data5=data4[data4["NAICS"].isin(naics)]
+        data7=data6[data6["NAICS"].isin(naics)]
 
     #Combine Subheader
     combined_subheader = f"{subheader_text} {subheader_text_region} {subheader_text_district}"
@@ -225,52 +225,157 @@ def filter_sidebar(data):
  
     #Create filter for State, Depatrment and Agency
     #NO selection
-    if not state and not department and not agency and not naics:
+    if not state and not department and not agency and not naics and not selected_sba_regions and not sba_districts:
         show_df=data
     
-    #1 Selection
-    #Select State
-    elif not department and not agency and not naics:
-        show_df = data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
-    #Select Department
-    elif not state and not agency and not naics:
-        show_df = data[data["FUNDING_DEPARTMENT_NAME"].isin(department)]
-    #Select Agency
-    elif not state and not department and not naics:
-        show_df = data[data["FUNDING_AGENCY_NAME"].isin(agency)]
-   
-    # 3 selections
-    elif department and agency and naics:
-        show_df= data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
-    elif state and agency and naics:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
-    elif state and department and naics:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['NAICS'].isin(naics)]
-    elif state and department and agency:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department)& data5['FUNDING_AGENCY_NAME'].isin(agency)]
+    # #1 Selection
+    # #Select State
+    # elif not department and not agency and not naics:
+    #     show_df = data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
+    # #Select Department
+    # elif not state and not agency and not naics:
+    #     show_df = data[data["FUNDING_DEPARTMENT_NAME"].isin(department)]
+    # #Select Agency
+    # elif not state and not department and not naics:
+    #     show_df = data[data["FUNDING_AGENCY_NAME"].isin(agency)]
 
-    # 2 Selections
+
+    # One Selection
+    # Select State
+    elif not selected_sba_regions and not sba_districts and not department and not agency and not naics:
+        show_df = data[data["VENDOR_ADDRESS_STATE_NAME"].isin(state)]
+    # Select SBA Region
+    elif not state and not sba_districts and not department and not agency and not naics:
+        show_df = data[data["SBA_REGION"].isin(selected_sba_regions)]
+    # Select SBA District Office
+    elif not state and not selected_sba_regions and not department and not agency and not naics:
+        show_df = data[data["SBA_DISTRICT_OFFICE"].isin(sba_districts)]
+    # Select Department
+    elif not state and not selected_sba_regions and not sba_districts and not agency and not naics:
+        show_df = data[data["FUNDING_DEPARTMENT_NAME"].isin(department)]
+    # Select Agency
+    elif not state and not selected_sba_regions and not sba_districts and not department and not naics:
+        show_df = data[data["FUNDING_AGENCY_NAME"].isin(agency)]
+    # Select NAICS
+    elif not state and not selected_sba_regions and not sba_districts and not department and not agency:
+        show_df = data[data["NAICS"].isin(naics)]
+
+    #Four Selections
+    elif state and sba_regions and sba_districts and department:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts)& data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif state and sba_regions and sba_districts and agency:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif state and sba_regions and sba_districts and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["NAICS"].isin(naics)]
+    elif state and sba_regions and agency and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7["FUNDING_AGENCY_NAME"].isin(agency)& data7["NAICS"].isin(naics)]
+    elif state and sba_districts and department and agency:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency)]   
+    elif state and sba_districts and department and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["NAICS"].isin(naics)]  
+    elif state and sba_districts and agency and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["FUNDING_AGENCY_NAME"].isin(agency)& data7["NAICS"].isin(naics)] 
+    elif state and  department and agency and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)& data7["FUNDING_AGENCY_NAME"].isin(agency)& data7["NAICS"].isin(naics)]
+    elif sba_regions and sba_districts and department and agency:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)& data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif sba_regions and sba_districts and department and agency:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)& data7["NAICS"].isin(naics)]
+    elif sba_regions and department and agency and naics:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency)& data7["NAICS"].isin(naics)]
+    elif  sba_districts and department and agency:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency)& data7["NAICS"].isin(naics)]
+    
+    # Three selections
+    #State
+    elif state and sba_regions and sba_districts:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts)]
+    elif state and sba_regions and department:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif state and sba_regions and agency:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif state and sba_regions and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions) & data7["NAICS"].isin(naics)]
+    elif state and sba_districts and department:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif state and sba_districts and agency:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif state and sba_districts and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["NAICS"].isin(naics)]
+    elif state and  department and agency:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)& data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif state and  department and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)& data7["NAICS"].isin(naics)]
+    elif state and  agency and naics:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7["FUNDING_AGENCY_NAME"].isin(agency) & data7["NAICS"].isin(naics)]
+    
+    #SBA Region
+    elif sba_regions and sba_districts and department:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif sba_regions and sba_districts and agency:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif sba_regions and sba_districts and naics:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7["NAICS"].isin(naics)]
+    elif sba_regions and department and agency:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif sba_regions and department and naics:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["NAICS"].isin(naics)]
+    elif sba_regions and agency and naics:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7["FUNDING_AGENCY_NAME"].isin(agency) & data7["NAICS"].isin(naics)]
+    
+    #SBA Districts
+    elif  sba_districts and department and agency:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency)]
+    elif  sba_districts and department and naics:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["NAICS"].isin(naics)]
+    elif department and agency and naics:
+        show_df = data7[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7["FUNDING_AGENCY_NAME"].isin(agency) & data7["NAICS"].isin(naics)]
+
+
+    #Two selections
     #state
+    elif state and sba_regions:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_REGION'].isin(selected_sba_regions)]
+    elif state and sba_districts:
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts)]
     elif state and department:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_DEPARTMENT_NAME'].isin(department)]
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
     elif state and agency:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['FUNDING_AGENCY_NAME'].isin(agency)]
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['FUNDING_AGENCY_NAME'].isin(agency)]
     elif state and naics:
-        show_df = data5[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data5['NAICS'].isin(naics)]
+        show_df = data7[data['VENDOR_ADDRESS_STATE_NAME'].isin(state) & data7['NAICS'].isin(naics)]
+
+    #SBA Region
+    elif sba_regions and sba_districts:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['SBA_DISTRICT_OFFICE'].isin(sba_districts)]
+    elif sba_regions and department:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif sba_regions and agency:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['FUNDING_AGENCY_NAME'].isin(agency)]
+    elif sba_regions and naics:
+        show_df = data7[data['SBA_REGION'].isin(selected_sba_regions) & data7['NAICS'].isin(naics)]
+    
+    #SBA District
+    elif sba_districts and department:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_DEPARTMENT_NAME'].isin(department)]
+    elif sba_districts and agency:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['FUNDING_AGENCY_NAME'].isin(agency)]
+    elif sba_districts and naics:
+        show_df = data7[data['SBA_DISTRICT_OFFICE'].isin(sba_districts) & data7['NAICS'].isin(naics)]
 
     #department
     elif department and agency:
-        show_df = data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['FUNDING_AGENCY_NAME'].isin(agency)]
+        show_df = data7[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7['FUNDING_AGENCY_NAME'].isin(agency)]
     elif department and naics:
-        show_df = data5[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data5['NAICS'].isin(naics)]
+        show_df = data7[data['FUNDING_DEPARTMENT_NAME'].isin(department) & data7['NAICS'].isin(naics)]
 
     #agency  
     elif agency and naics:
-        show_df = data5[data['FUNDING_AGENCY_NAME'].isin(agency) & data5['NAICS'].isin(naics)]
+        show_df = data7[data['FUNDING_AGENCY_NAME'].isin(agency) & data7['NAICS'].isin(naics)]
     else:
-        show_df =data5['NAICS'].isin(naics)
+        show_df =data7['NAICS'].isin(naics)
     return show_df
-
+    
 #%%
 @st.cache_data
 def group_data_year(show_df):
@@ -333,8 +438,6 @@ def table_percent(year_df):
 def download_data(year_df,year_df_pct):
     year_df=year_df.set_index('FISCAL_YEAR')
     merge_df= pd.merge(year_df,year_df_pct, left_index=True, right_index=True)
-    st.write(merge_df.columns)
-    
     merge_df = merge_df[["Total$","SmallBusiness$","SmallBusiness%","SDB$","SDB%","WOSB$","WOSB%","HUBZone$","HUBZone%","SDVOSB$","SDVOSB%","8(a)$","8(a)%"]]
     st.download_button(label="Download Data",data=merge_df.to_csv(),file_name="scorecard.csv")
 
@@ -347,8 +450,9 @@ def expander(show_df):
                        "EIGHT_A_PROCEDURE_DOLLARS": "8(a)$", 'FISCAL_YEAR': 'Fiscal Year', 'VENDOR_ADDRESS_STATE_NAME': 'Vendor State',
                        'FUNDING_DEPARTMENT_NAME': 'Department', 'FUNDING_AGENCY_NAME': 'Agency', 'NAICS': 'NAICS Code'}
             detailed_df = detailed_df.rename(columns=doldict)
-            detailed_df[dolcols_rename] = detailed_df[dolcols_rename].apply(lambda x: round(x,2))  # Round to 2 decimal places
-            percent_df = detailed_df.iloc[:, 7:].div(detailed_df.iloc[:, 6], axis=0).multiply(100)
+            detailed_df[dolcols_rename] = detailed_df[dolcols_rename].apply(lambda x: round(x,2))  # Round to 2 decimal placeS
+            
+            percent_df = detailed_df.iloc[:, 6:].div(detailed_df.iloc[:, 5], axis=0).multiply(100)
             percent_df.columns = percent_df.columns.str.replace("$", "%", regex=False)
             merged_df=pd.merge(detailed_df,percent_df,left_index=True, right_index=True)
             merged_df=merged_df[['Fiscal Year', 'Vendor State', 'Department', 'Agency','NAICS Code', 'Total$', 'SmallBusiness$','SmallBusiness%','SDB$','SDB%', 'WOSB$','WOSB%','HUBZone$','HUBZone%','SDVOSB$','SDVOSB%','8(a)$','8(a)%']]
