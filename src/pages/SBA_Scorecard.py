@@ -227,7 +227,7 @@ def filter_sidebar(data):
  
     #Create filter for State, Depatrment and Agency
     #NO selection
-    if not state and not department and not agency and not naics and not selected_sba_regions and not sba_districts:
+    if not state and not department and not agency and not naics and not sba_regions and not sba_districts:
         show_df=data
 
     # One Selection
