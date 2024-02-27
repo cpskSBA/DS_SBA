@@ -284,8 +284,7 @@ def filter_sidebar(data):
         region_filter =True
         district_filter = True
         data2=data.copy() if not state_filter.any() else data[data["VENDOR_ADDRESS_STATE_NAME"].isin(codes)]
-        #subheader_text_state = f"State: {', '.join(codes)}" if codes else ""
-
+        #subheader_text_state = f"State: {', '.join(codes)}" if codes else "
     
     elif filter_choice == 'SBA Region':
         sba_regions =sorted(data['SBA_REGION'].dropna().unique(), key =lambda x: int(x.split(' ')[-1]))
@@ -298,7 +297,7 @@ def filter_sidebar(data):
     else:
          codes = st.sidebar.multiselect("SBA District",sorted(data['SBA_DISTRICT_OFFICE'].dropna().unique()))
          district_filter =data['SBA_DISTRICT_OFFICE'].isin(codes)
-         district_filter=True
+         region_filter=True
          state_filter =True
          data2=data.copy() if not district_filter.any() else data[data["SBA_DISTRICT_OFFICE"].isin(codes)]
          #subheader_text_district =f"SBA District: {', '.join(codes)}" if codes else ""
