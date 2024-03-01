@@ -209,8 +209,8 @@ def group_data_naics(show_df):
         return pd.Series({
             'Total # Awards': total_awards_sat,
             'Total Aggregated $': total_dollars_sat,
-            '% of Orders NOT SET ASIDE': percentage_orders_not_set_aside,
-            '% of % NOT SET ASIDE': percentage_dollars_not_set_aside,
+            '% Orders NOT SET ASIDE': percentage_orders_not_set_aside,
+            '% $ NOT SET ASIDE': percentage_dollars_not_set_aside,
             
             '# SB Awards': small_business_awards_count,
             'SB Awarded $': small_business_dollars,
@@ -230,7 +230,7 @@ def table_chart_one(aggregated_df):
     
     dollars_cols=['Total Aggregated $','SB Awarded $','Other Than SB Awarded $']
     n_cols= ['Total # Awards','# SB Awards','Other Than SB # Awards']
-    per_cols= ['% of Orders NOT SET ASIDE','% of $ NOT SET ASIDE']
+    per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
 
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
@@ -246,4 +246,9 @@ if __name__ == "__main__":
     filter = filter_sidebar(data)
     group_df=group_data_naics(filter)
     table=table_chart_one(group_df)
+
+st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
+Abbreviations: \n
+Total dollars are total scorecard-eligible dollars after applying the exclusions on the [SAM.gov Small Business Goaling Report Appendix](https://sam.gov/reports/awards/standard/F65016DF4F1677AE852B4DACC7465025/view) (login required).""")
+
     
