@@ -52,7 +52,7 @@ def filter_sidebar(data):
     #Create filter for State and SBA Region and SBA DIstrict
     filter_choice=st.sidebar.radio("Select Filter",["Funding Department","Funding Agency", "Contracting Department", "Contracting Agency"])
     
-    if filter_choice == 'Funding Department':
+    if filter_choice == 'Funding Department (Default Governmentwide):':
         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
@@ -63,7 +63,7 @@ def filter_sidebar(data):
        
         data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
         
-    elif filter_choice == 'Funding Agency':
+    elif filter_choice == 'Funding Agency (Default Governmentwide):':
         codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
         f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
         
@@ -73,7 +73,7 @@ def filter_sidebar(data):
         
         data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
         
-    elif filter_choice == 'Contracting Department':
+    elif filter_choice == 'Contracting Department (Default Governmentwide):':
         codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
         c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
         
@@ -84,7 +84,7 @@ def filter_sidebar(data):
         data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
         
     else:
-         codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
+         codes = st.sidebar.multiselect("Contracting Agency (Default Governmentwide):",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
          c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
          
          f_agency_filter =True
@@ -104,7 +104,7 @@ def filter_sidebar(data):
         
         
     #Create a filter by fISCAL YEAR
-    year=st.sidebar.multiselect("Fiscal Year", sorted(data3['FISCAL_YEAR'].dropna().unique()))
+    year=st.sidebar.multiselect("Fiscal Year (Default All Years):", sorted(data3['FISCAL_YEAR'].dropna().unique()))
     # if not year:
     #     data4=data3.copy()   
     # else:
@@ -248,9 +248,14 @@ if __name__ == "__main__":
     table=table_chart_one(group_df)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
-An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).
-Abbreviations:Total # Awards - Count of Total Awards given under the NAICS code, Total Aggregated $ - Sum of Dollars under the NAICS code, % Orders NOT SET ASIDE - Percent of Orders that are NOT A SET ASIDE under the NAICS Code',
-% $ NOT SET ASIDE - Percent of Dollars that are NOT A SET ASIDE under the NAICS Code, # SB Awards - Count of Awards given to Small Business under the NAICS Code, SB Awarded $ - Sum of Dollars awared to Small Business under the NAICS Code'
-Other Than SB # Awards - Count of Awards given to Other Than Small Business under the NAICS Code, Other Than SB Awarded $ - Sum of Dollars awared to Other than Small Business under the NAICS Code.\n
+An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
+Abbreviations: Total # Awards: Count of Total Awards given under the NAICS code, 
+           Total Aggregated $ - Sum of Dollars under the naics code, 
+           % Orders NOT SET ASIDE - Percent of Orders that are NOT A SET ASIDE under the NAICS Code,
+           % $ NOT SET ASIDE - Percent of Dollars that are NOT A SET ASIDE under the NAICS Code, 
+           # SB Awards - Count of Awards given to Small Business under the NAICS Code, 
+           SB Awarded $ - Sum of Dollars awared to Small Business under the NAICS Code,
+           Other Than SB # Awards - Count of Awards given to Other Than Small Business under the NAICS Code, 
+           Other Than SB Awarded $ - Sum of Dollars awared to Other than Small Business under the NAICS Code.\n
 Total dollars are total scorecard-eligible dollars after applying the exclusions on the [SAM.gov Small Business Goaling Report Appendix](https://sam.gov/reports/awards/standard/F65016DF4F1677AE852B4DACC7465025/view) (login required).""")
 
