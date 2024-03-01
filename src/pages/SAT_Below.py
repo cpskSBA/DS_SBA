@@ -117,26 +117,26 @@ def filter_sidebar(data):
 
     #Create filter for State, Depatrment and Agency
     #NO selection
-    if not codes and not competition and not year and not award:
+    if not codes and not competition and not year:
         show_df=data
 
     #1 Selection
     #Select State
-    elif not competition and not year and not award:
+    elif not competition and not year:
         show_df = data[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter]
     #Select Department
-    elif not codes and not competition and not award:
+    elif not codes and not competition:
         show_df = data[data["FISCAL_YEAR"].isin(year)]
     #Select Agency
-    elif not codes and not year and not award:
+    elif not codes and not year:
         show_df = data[data["SET_ASIDE"].isin(competition)]
     #Select award type
     elif not codes and not competition and not year:
         show_df = data[data["AWARD_TYPE"].isin(year)]
 
     #All selection
-    elif codes and competition and year and award:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
+    elif codes and competition and year:
+        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
 
     
     # 3 selections
