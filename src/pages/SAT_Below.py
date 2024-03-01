@@ -177,9 +177,8 @@ def filter_sidebar(data):
     
 #%%
 def group_data_naics(show_df):
-    available_naics=show_df['NAICS'].unique()
-    filtered_group=show_df[show_df['NAICS'].isin(available_naics)]
-    grouped = filtered_group.groupby('NAICS')
+
+    grouped = show_df.groupby('NAICS').sort_values('NAICS')
 
 
 # Define a function to calculate the aggregated values for each NAICS group 
@@ -211,8 +210,8 @@ def group_data_naics(show_df):
         return pd.Series({
             'Total # Awards': total_awards_sat,
             'Total Aggregated $': total_dollars_sat,
-            '% of orders NOT SET ASIDE': percentage_orders_not_set_aside,
-            '% of dollars NOT SET ASIDE': percentage_dollars_not_set_aside,
+            '% of Orders NOT SET ASIDE': percentage_orders_not_set_aside,
+            '% of % NOT SET ASIDE': percentage_dollars_not_set_aside,
             
             '# SB Awards': small_business_awards_count,
             'SB Awarded $': small_business_dollars,
@@ -232,7 +231,7 @@ def table_chart_one(aggregated_df):
     
     dollars_cols=['Total Aggregated $','SB Awarded $','Other Than SB Awarded $']
     n_cols= ['Total # Awards','# SB Awards','Other Than SB # Awards']
-    per_cols= ['% of orders NOT SET ASIDE','% of dollars NOT SET ASIDE']
+    per_cols= ['% of Orders NOT SET ASIDE','% of $ NOT SET ASIDE']
 
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
