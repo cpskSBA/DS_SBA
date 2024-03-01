@@ -177,7 +177,6 @@ def filter_sidebar(data):
     return show_df 
     
 #%%
-@st.cache_data
 def group_data_naics(show_df):
     available_naics=show_df['NAICS'].unique()
     filtered_group=show_df[show_df['NAICS'].isin(available_naics)]
