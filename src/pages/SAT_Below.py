@@ -10,7 +10,7 @@ from snowflake.snowpark.context import get_active_session
 import numpy as np
 
 
-page_title= "SAT Below Purchases"
+page_title= "Below SAT Purchases"
 
 st.set_page_config(
     page_title=page_title,
@@ -211,8 +211,8 @@ def group_data_naics(show_df):
         return pd.Series({
             'Total # Awards': total_awards_sat,
             'Total Aggregated $': total_dollars_sat,
-            # 'Percentage of orders not set aside': percentage_orders_not_set_aside,
-            # 'Percentage of dollars not set aside': percentage_dollars_not_set_aside,
+            '% of orders NOT SET ASIDE': percentage_orders_not_set_aside,
+            '% of dollars NOT SET ASIDE': percentage_dollars_not_set_aside,
             
             '# SB Awards': small_business_awards_count,
             'SB Awarded $': small_business_dollars,
@@ -232,8 +232,11 @@ def table_chart_one(aggregated_df):
     
     dollars_cols=['Total Aggregated $','SB Awarded $','Other Than SB Awarded $']
     n_cols= ['Total # Awards','# SB Awards','Other Than SB # Awards']
+    per_cols= ['% of orders NOT SET ASIDE','% of dollars NOT SET ASIDE']
+
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
+    aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '%{:,.0f}'.format(x))
     
     aggregated_df_chart=aggregated_df_chart.set_index('NAICS')
     st.dataframe(aggregated_df_chart)
