@@ -178,8 +178,7 @@ def filter_sidebar(data):
 #%%
 def group_data_naics(show_df):
 
-    grouped = show_df.groupby('NAICS').sort_values('NAICS')
-
+    grouped = show_df.groupby('NAICS')
 
 # Define a function to calculate the aggregated values for each NAICS group 
     def calculate_aggregates(group):
@@ -237,7 +236,7 @@ def table_chart_one(aggregated_df):
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
     aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '%{:,.0f}'.format(x))
     
-    aggregated_df_chart=aggregated_df_chart.set_index('NAICS')
+    aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
     st.dataframe(aggregated_df_chart)
     return aggregated_df_chart
 
