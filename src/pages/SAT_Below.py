@@ -106,13 +106,13 @@ def filter_sidebar(data):
         
     #Create a filter by fISCAL YEAR
     year=st.sidebar.multiselect("Fiscal Year", sorted(data3['FISCAL_YEAR'].dropna().unique()))
-    if not year:
-        data4=data3.copy()   
-    else:
-        data4=data3[data3['FISCAL_YEAR'].isin(year)]
+    # if not year:
+    #     data4=data3.copy()   
+    # else:
+    #     data4=data3[data3['FISCAL_YEAR'].isin(year)]
 
-     #Create a filter by award type
-    award=st.sidebar.multiselect("Award Type", sorted(data4['AWARD_TYPE'].dropna().unique()))
+    #  #Create a filter by award type
+    # award=st.sidebar.multiselect("Award Type", sorted(data4['AWARD_TYPE'].dropna().unique()))
     
 
     #Create filter for State, Depatrment and Agency
@@ -136,42 +136,42 @@ def filter_sidebar(data):
 
     #All selection
     elif codes and competition and year:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
+        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
 
     
-    # 3 selections
-    elif codes and competition and year:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
+    # # 3 selections
+    # elif codes and competition and year:
+    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
 
-    elif codes and competition and award:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
+    # elif codes and competition and award:
+    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
 
-    elif competition and year and award:
-        show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
+    # elif competition and year and award:
+    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
 
     #2 selections
         #Codes
     elif codes and competition:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)]
+        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)]
 
     elif codes and year:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['FISCAL_YEAR'].isin(year)]
+        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
 
-    elif codes and award:
-        show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['AWARD_TYPE'].isin(award)]
+    # elif codes and award:
+    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['AWARD_TYPE'].isin(award)]
 
         #Competition
-    elif competition and year:
-        show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
-    elif competition and award:
-        show_df = data4[data['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
+    # elif competition and year:
+    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
+    # elif competition and award:
+    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
 
         #Fiscal Year
-    elif year and award:
-        show_df = data4[data['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
+    # elif year and award:
+    #     show_df = data4[data['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
 
-    else:
-        show_df =data4[data['AWARD_TYPE'].isin(award)] 
+    # else:
+    #     show_df =data4[data['AWARD_TYPE'].isin(award)] 
 
     
     return show_df 
