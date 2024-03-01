@@ -234,7 +234,7 @@ def table_chart_one(aggregated_df):
 
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
-    aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '%{:,.0f}'.format(x))
+    aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
     
     aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
     st.dataframe(aggregated_df_chart)
@@ -248,7 +248,9 @@ if __name__ == "__main__":
     table=table_chart_one(group_df)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
-Abbreviations: \n
+An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).
+Abbreviations:Total # Awards - Count of Total Awards given under the NAICS code, Total Aggregated $ - Sum of Dollars under the NAICS code, % Orders NOT SET ASIDE - Percent of Orders that are NOT A SET ASIDE under the NAICS Code' \n
+% $ NOT SET ASIDE - Percent of Dollars that are NOT A SET ASIDE under the NAICS Code, # SB Awards - Count of Awards given to Small Business under the NAICS Code, SB Awarded $ - Sum of Dollars awared to Small Business under the NAICS Code'\n
+Other Than SB # Awards - Count of Awards given to Other Than Small Business under the NAICS Code, Other Than SB Awarded $ - Sum of Dollars awared to Other than Small Business under the NAICS Code.\n
 Total dollars are total scorecard-eligible dollars after applying the exclusions on the [SAM.gov Small Business Goaling Report Appendix](https://sam.gov/reports/awards/standard/F65016DF4F1677AE852B4DACC7465025/view) (login required).""")
 
-    
