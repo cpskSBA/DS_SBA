@@ -43,7 +43,6 @@ def get_data():
     return data
 
 #%%
-@st.cache_data
 def filter_sidebar(data):
     st.sidebar.header("Choose Your Filter: ")
     
