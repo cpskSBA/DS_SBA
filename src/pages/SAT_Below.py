@@ -45,9 +45,9 @@ def filter_sidebar(data):
     #data = data.dropna(subset=["FUNDING_AGENCY_NAME",]).sort_values('VENDOR_ADDRESS_STATE_NAME')
 
     #Create filter for State and SBA Region and SBA DIstrict
-    filter_choice=st.sidebar.radio("Select Filter",["Funding Department","Funding Agency", "Contracting Department", "Contracting Agency"])
+    filter_choice=st.sidebar.radio("Select Filter",["Funding Department(Default Governmentwide)","Funding Agency(Default Governmentwide)", "Contracting Department(Default Governmentwide)", "Contracting Agency(Default Governmentwide)"])
     
-    if filter_choice == 'Funding Department (Default Governmentwide):':
+    if filter_choice == 'Funding Department(Default Governmentwide):':
         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
