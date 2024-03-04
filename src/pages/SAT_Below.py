@@ -27,20 +27,15 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 #%%
-# Columns to read and group by
-#basiccols=['VENDOR_ADDRESS_STATE_NAME','FUNDING_DEPARTMENT_NAME','FUNDING_AGENCY_NAME','PRINCIPAL_NAICS_CODE','PRINCIPAL_NAICS_DESCRIPTION','CONTRACTING_DEPARTMENT_NAME','CONTRACTING_AGENCY_NAME','IDV_PIID','MODIFICATION_NUMBER','TYPE_OF_SET_ASIDE']
-# Columns for numbers and dollar amounts
-#dolcols=["ULTIMATE_CONTRACT_VALUE","TOTAL_SB_ACT_ELIGIBLE_DOLLARS","SMALL_BUSINESS_DOLLARS","SDB_DOLLARS","WOSB_DOLLARS","CER_HUBZONE_SB_DOLLARS","SRDVOB_DOLLARS","EIGHT_A_PROCEDURE_DOLLARS"]
-
-#%%
 @st.cache_data
 def get_data():
     connection_parameters = st.secrets.snowflake_credentials
     global session
     session = sp.Session.builder.configs(connection_parameters).create()
     data = session.table("TMP_BELOW_SAT_DASHBOARD_2")
+    data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
     data =data.to_pandas()
-    return data
+    return data, data_naics
 
 #%%
 def filter_sidebar(data):
@@ -240,17 +235,24 @@ def table_chart_one(aggregated_df):
     st.dataframe(aggregated_df_chart)
     return aggregated_df_chart
 
+def table_chart_two(data_naics):
+    data_naics['SB_RATIO'] = data_naics['SB_RATION'].applymap(lambda x: '{:,.2f}%'.format(x))
+    #data_naics= data_naics.rename(columns={""})
+    st.table(data_naics)
+    return data_naics
+
 if __name__ == "__main__":
     st.header(page_title)
-    data = get_data()
+    data,data_naics = get_data()
     filter = filter_sidebar(data)
     group_df=group_data_naics(filter)
     table=table_chart_one(group_df)
+    table_two=table_chart_one(data_naics)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
 An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
 Abbreviations: Total # Awards: Count of Total Awards given under the NAICS code, 
-           Total Aggregated $ - Sum of Dollars under the naics code, 
+           Total Aggregated $ - Sum of Dollars under the NAICS code, 
            % Orders NOT SET ASIDE - Percent of Orders that are NOT A SET ASIDE under the NAICS Code,
            % $ NOT SET ASIDE - Percent of Dollars that are NOT A SET ASIDE under the NAICS Code, 
            # SB Awards - Count of Awards given to Small Business under the NAICS Code, 
