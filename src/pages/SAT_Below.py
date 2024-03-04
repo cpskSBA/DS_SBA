@@ -233,7 +233,7 @@ def table_chart_one(aggregated_df):
     
     aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
     st.dataframe(aggregated_df_chart)
-    st.download_button(label="Download Data", data = aggregated_df_chart)
+    #st.download_button(label="Download Data", data = aggregated_df_chart)
     return aggregated_df_chart
 
 def table_chart_two(data_naics):
@@ -241,7 +241,7 @@ def table_chart_two(data_naics):
     data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).set_index('NAICS').sort_values("NAICS")
     st.subheader('Count of Vendors by NAICS Code Governmentwide')
     st.dataframe(data_naics)
-    st.download_button(label="Download Data", data = data_naics)
+    #st.download_button(label="Download Data", data = data_naics)
     return data_naics
 
 if __name__ == "__main__":
