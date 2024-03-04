@@ -75,6 +75,9 @@ def filter_sidebar(data):
     naics = st.sidebar.multiselect("NAICS Code", sorted(filtered_data['NAICS'].dropna().unique()))
     filtered_data = filtered_data[filtered_data['NAICS'].isin(naics)] if naics else filtered_data
     
+    psc = st.sidebar.multiselect("PSC Code", sorted(filtered_data['PSC'].dropna().unique()))
+    filtered_data = filtered_data[filtered_data['PSC'].isin(psc)] if psc else filtered_data
+    
     return filtered_data
 
 #%%

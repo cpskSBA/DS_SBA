@@ -39,97 +39,127 @@ def get_data():
 
 #%%
 def filter_sidebar(data):
-    st.sidebar.header("Choose Your Filter: ")
+    st.sidebar.header("Choose Your Filter:")
+
+    # Create filter options
+    filter_options = {
+        'Funding Department': 'FUNDING_DEPARTMENT_NAME',
+        'Funding Agency': 'FUNDING_AGENCY_NAME',
+        'Contracting Department': 'CONTRACTING_DEPARTMENT_NAME',
+        'Contracting Agency': 'CONTRACTING_AGENCY_NAME'
+    }
+
+    # Choose filter
+    filter_choice = st.sidebar.radio("Select Filter (Default Governmentwide)", list(filter_options.keys()))
+    filter_column = filter_options[filter_choice]
+
+    # Filter data based on selected filter
+    selected_values = st.sidebar.multiselect(filter_choice, sorted(data[filter_column].dropna().unique()))
+    filter_condition = data[filter_column].isin(selected_values)
+    filtered_data = data[filter_condition] if selected_values else data
+
+    # Filter by Competition
+    competition = st.sidebar.multiselect("Competition", sorted(filtered_data['SET_ASIDE'].dropna().unique()))
+    filtered_data = filtered_data[filtered_data['SET_ASIDE'].isin(competition)] if competition else filtered_data
+
+    # Filter by Fiscal Year
+    fiscal_year = st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(filtered_data['FISCAL_YEAR'].dropna().unique()))
+    filtered_data = filtered_data[filtered_data['FISCAL_YEAR'].isin(fiscal_year)] if fiscal_year else filtered_data
+
+    return filtered_data
+
+# def filter_sidebar(data):
+#     st.sidebar.header("Choose Your Filter: ")
    
-    #Create filter for State and SBA Region and SBA DIstrict
-    filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
+#     #Create filter for State and SBA Region and SBA DIstrict
+#     filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
     
-    if filter_choice == 'Funding Department':
-        codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
-        f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
-        f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
+#     if filter_choice == 'Funding Department':
+#         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
+#         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
+#         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
 
-        f_agency_filter =True
-        c_dept_filter =True
-        c_agency_filter = True
+#         f_agency_filter =True
+#         c_dept_filter =True
+#         c_agency_filter = True
        
-        data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
+#         data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
         
-    elif filter_choice == 'Funding Agency':
-        codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
-        f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
+#     elif filter_choice == 'Funding Agency':
+#         codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
+#         f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
         
-        f_dept_filter =True
-        c_dept_filter =True
-        c_agency_filter = True
+#         f_dept_filter =True
+#         c_dept_filter =True
+#         c_agency_filter = True
         
-        data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
+#         data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
         
-    elif filter_choice == 'Contracting Department':
-        codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
-        c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
+#     elif filter_choice == 'Contracting Department':
+#         codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
+#         c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
         
-        f_agency_filter =True
-        f_dept_filter =True
-        c_agency_filter = True
+#         f_agency_filter =True
+#         f_dept_filter =True
+#         c_agency_filter = True
         
-        data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
+#         data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
         
-    else:
-         codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
-         c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
+#     else:
+#          codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
+#          c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
          
-         f_agency_filter =True
-         f_dept_filter =True
-         c_dept_filter = True
+#          f_agency_filter =True
+#          f_dept_filter =True
+#          c_dept_filter = True
          
-         data2=data.copy() if not c_agency_filter.any() else data[data["CONTRACTING_AGENCY_NAME"].isin(codes)]
+#          data2=data.copy() if not c_agency_filter.any() else data[data["CONTRACTING_AGENCY_NAME"].isin(codes)]
         
     
-    #Create a Filter by Competition
-    competition=st.sidebar.multiselect("Competition", sorted(data2['SET_ASIDE'].dropna().unique()))
+#     #Create a Filter by Competition
+#     competition=st.sidebar.multiselect("Competition", sorted(data2['SET_ASIDE'].dropna().unique()))
     
-    if not competition:
-        data3=data2.copy()   
-    else:
-        data3=data2[data2["SET_ASIDE"].isin(competition)]
+#     if not competition:
+#         data3=data2.copy()   
+#     else:
+#         data3=data2[data2["SET_ASIDE"].isin(competition)]
         
         
-    #Create a filter by fISCAL YEAR
-    year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
+#     #Create a filter by fISCAL YEAR
+#     year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
 
-    #Create filter for State, Depatrment and Agency
-    #NO selection
-    if not codes and not competition and not year:
-        show_df=data
+#     #Create filter for State, Depatrment and Agency
+#     #NO selection
+#     if not codes and not competition and not year:
+#         show_df=data
 
-    #1 Selection
-    #Select State
-    elif not competition and not year:
-        show_df = data[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter]
-    #Select Department
-    elif not codes and not competition:
-        show_df = data[data["FISCAL_YEAR"].isin(year)]
-    #Select Agency
-    elif not codes and not year:
-        show_df = data[data["SET_ASIDE"].isin(competition)]
-    #Select award type
-    elif not codes and not competition and not year:
-        show_df = data[data["AWARD_TYPE"].isin(year)]
+#     #1 Selection
+#     #Select State
+#     elif not competition and not year:
+#         show_df = data[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter]
+#     #Select Department
+#     elif not codes and not competition:
+#         show_df = data[data["FISCAL_YEAR"].isin(year)]
+#     #Select Agency
+#     elif not codes and not year:
+#         show_df = data[data["SET_ASIDE"].isin(competition)]
+#     #Select award type
+#     elif not codes and not competition and not year:
+#         show_df = data[data["AWARD_TYPE"].isin(year)]
 
-    #All selection
-    elif codes and competition and year:
-        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
+#     #All selection
+#     elif codes and competition and year:
+#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
 
-    #2 selections
-        #Codes
-    elif codes and competition:
-        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)]
+#     #2 selections
+#         #Codes
+#     elif codes and competition:
+#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)]
 
-    elif codes and year:
-        show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
+#     elif codes and year:
+#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
     
-    return show_df 
+#     return show_df 
     
 #%%
 def group_data_naics(show_df):
