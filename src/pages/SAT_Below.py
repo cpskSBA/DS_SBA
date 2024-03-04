@@ -33,17 +33,14 @@ def get_data():
     global session
     session = sp.Session.builder.configs(connection_parameters).create()
     data = session.table("TMP_BELOW_SAT_DASHBOARD_2")
-    data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
     data =data.to_pandas()
+    data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
     return data, data_naics
 
 #%%
 def filter_sidebar(data):
     st.sidebar.header("Choose Your Filter: ")
-    
-    #Sort by State Alphabetical Order
-    #data = data.dropna(subset=["FUNDING_AGENCY_NAME",]).sort_values('VENDOR_ADDRESS_STATE_NAME')
-
+   
     #Create filter for State and SBA Region and SBA DIstrict
     filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
     
@@ -100,14 +97,6 @@ def filter_sidebar(data):
         
     #Create a filter by fISCAL YEAR
     year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
-    # if not year:
-    #     data4=data3.copy()   
-    # else:
-    #     data4=data3[data3['FISCAL_YEAR'].isin(year)]
-
-    #  #Create a filter by award type
-    # award=st.sidebar.multiselect("Award Type", sorted(data4['AWARD_TYPE'].dropna().unique()))
-    
 
     #Create filter for State, Depatrment and Agency
     #NO selection
@@ -132,17 +121,6 @@ def filter_sidebar(data):
     elif codes and competition and year:
         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
 
-    
-    # # 3 selections
-    # elif codes and competition and year:
-    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
-
-    # elif codes and competition and award:
-    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
-
-    # elif competition and year and award:
-    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
-
     #2 selections
         #Codes
     elif codes and competition:
@@ -150,23 +128,6 @@ def filter_sidebar(data):
 
     elif codes and year:
         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
-
-    # elif codes and award:
-    #     show_df = data4[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data4['AWARD_TYPE'].isin(award)]
-
-        #Competition
-    # elif competition and year:
-    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['FISCAL_YEAR'].isin(year)]
-    # elif competition and award:
-    #     show_df = data4[data['SET_ASIDE'].isin(competition)& data4['AWARD_TYPE'].isin(award)]
-
-        #Fiscal Year
-    # elif year and award:
-    #     show_df = data4[data['FISCAL_YEAR'].isin(year)& data4['AWARD_TYPE'].isin(award)]
-
-    # else:
-    #     show_df =data4[data['AWARD_TYPE'].isin(award)] 
-
     
     return show_df 
     
@@ -238,7 +199,7 @@ def table_chart_one(aggregated_df):
 
 def table_chart_two(data_naics):
     data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
-    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).set_index('NAICS').sort_values("NAICS")
+    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').set_index('NAICS').sort_values("NAICS")
     st.subheader('Count of Vendors by NAICS Code Governmentwide')
     st.dataframe(data_naics)
     #st.download_button(label="Download Data", data = data_naics)
