@@ -75,8 +75,8 @@ def filter_sidebar(data):
     naics = st.sidebar.multiselect("NAICS Code", sorted(filtered_data['NAICS'].dropna().unique()))
     filtered_data = filtered_data[filtered_data['NAICS'].isin(naics)] if naics else filtered_data
     
-    psc = st.sidebar.multiselect("PSC Code", sorted(filtered_data['PSC'].dropna().unique()))
-    filtered_data = filtered_data[filtered_data['PSC'].isin(psc)] if psc else filtered_data
+    # psc = st.sidebar.multiselect("PSC Code", sorted(filtered_data['PSC'].dropna().unique()))
+    # filtered_data = filtered_data[filtered_data['PSC'].isin(psc)] if psc else filtered_data
     
     return filtered_data
 
@@ -126,6 +126,7 @@ def percent_chart(year_df):
 # Create table by Year and dolcols
 #%%
 def table_chart_one(year_df):
+    st.write(year_df.head())
     year_df_chart=year_df.copy()
     year_df_chart[dolcols_rename]=year_df_chart[dolcols_rename].applymap(lambda x: '${:,.0f}'.format(x))
     year_df_chart=year_df_chart.set_index('FISCAL_YEAR')
