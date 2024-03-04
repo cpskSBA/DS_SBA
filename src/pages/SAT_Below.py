@@ -207,11 +207,11 @@ def group_data_naics(show_df):
             '% Orders NOT SET ASIDE': percentage_orders_not_set_aside,
             '% $ NOT SET ASIDE': percentage_dollars_not_set_aside,
             
-            '# SB Awards': small_business_awards_count,
-            'SB Awarded $': small_business_dollars,
+            '# Small Business Awards': small_business_awards_count,
+            'Small Business Awarded $': small_business_dollars,
             
-            'Other Than SB # Awards': other_than_small_business_awards_count,
-            'Other Than SB Awarded $': other_than_small_business_dollars
+            'Other Than Small Business # Awards': other_than_small_business_awards_count,
+            'Other Than Small Business Awarded $': other_than_small_business_dollars
         })
 
     # Apply the function to each group and concatenate the results 
@@ -223,8 +223,8 @@ def group_data_naics(show_df):
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
     
-    dollars_cols=['Total Aggregated $','SB Awarded $','Other Than SB Awarded $']
-    n_cols= ['Total # Awards','# SB Awards','Other Than SB # Awards']
+    dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
+    n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
     per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
 
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
@@ -236,9 +236,10 @@ def table_chart_one(aggregated_df):
     return aggregated_df_chart
 
 def table_chart_two(data_naics):
-    data_naics['SB_RATIO'] = data_naics['SB_RATION'].applymap(lambda x: '{:,.2f}%'.format(x))
-    #data_naics= data_naics.rename(columns={""})
-    st.table(data_naics)
+    data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
+    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).set_index('NAICS').sort_values("NAICS")
+    st.subheader('Count of Vendors by NAICS Code Governmentwide')
+    st.dataframe(data_naics)
     return data_naics
 
 if __name__ == "__main__":
@@ -247,17 +248,12 @@ if __name__ == "__main__":
     filter = filter_sidebar(data)
     group_df=group_data_naics(filter)
     table=table_chart_one(group_df)
-    table_two=table_chart_one(data_naics)
+    table_two=table_chart_two(data_naics)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
 An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
-Abbreviations: Total # Awards: Count of Total Awards given under the NAICS code, 
-           Total Aggregated $ - Sum of Dollars under the NAICS code, 
-           % Orders NOT SET ASIDE - Percent of Orders that are NOT A SET ASIDE under the NAICS Code,
-           % $ NOT SET ASIDE - Percent of Dollars that are NOT A SET ASIDE under the NAICS Code, 
-           # SB Awards - Count of Awards given to Small Business under the NAICS Code, 
-           SB Awarded $ - Sum of Dollars awared to Small Business under the NAICS Code,
-           Other Than SB # Awards - Count of Awards given to Other Than Small Business under the NAICS Code, 
-           Other Than SB Awarded $ - Sum of Dollars awared to Other than Small Business under the NAICS Code.\n
-Total dollars are total scorecard-eligible dollars after applying the exclusions on the [SAM.gov Small Business Goaling Report Appendix](https://sam.gov/reports/awards/standard/F65016DF4F1677AE852B4DACC7465025/view) (login required).""")
+Abbreviations: Total # Awards - Count of total awards given under the NAICS code, Total Aggregated Dollars - Sum of dollars under the NAICS code, % of Orders NOT SET ASIDE - Percent of orders that are NOT A SET ASIDE under the NAICS code, 
+           % Dollars NOT SET ASIDE - Percent of dollars that are NOT A SET ASIDE under the NAICS Code, # Small Buiness Awards - Count of awards given to small business under the NAICS Code, Small Business Awarded Dollars - Sum of dollars awared to Small Business under the NAICS code, 
+           Other Than Small Business # Awards - Count of awards given to other than small business under the NAICS Code, Other Than Small Business Awarded Dollars - Sum of dollars awared to other than small business under the NAICS Code.""")
+
 
