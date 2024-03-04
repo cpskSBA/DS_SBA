@@ -469,47 +469,14 @@ def expander(show_df):
 
 if __name__ == "__main__":
     st.header(page_title)
-    data = get_data()
-    filter = filter_sidebar(data) #Read dataset
-    group_df=group_data_year(filter) #Apply Filter
-    selected_pct= percent_chart(group_df) #Create groupby dataset
-    show_table=table_chart_one(group_df) #Table dollars 
-    percent_table=table_percent(group_df) #Percent Table
-    download_df=download_data(group_df,percent_table)#Download data
-    expander_df= expander(filter)#Create Expander
-
-    # start_time = time.time()
     # data = get_data()
-    # st.write("--- %s seconds get_data ---" % (time.time() - start_time))
-
-    # start_time = time.time()
-    # filter = filter_sidebar(data)
-    # st.write("--- %s seconds filter_sidebar ---" % (time.time() - start_time))
-    
-    # start_time = time.time()
-    # group_df=group_data_year(filter)
-    # st.write("--- %s seconds group_data_year ---" % (time.time() - start_time))
-    
-    # start_time = time.time()
-    # selected_pct= percent_chart(group_df)
-    # st.write("--- %s seconds percent_chart ---" % (time.time() - start_time))
-
-    # start_time = time.time()
-    # show_table=table_chart_one(group_df) #table dollars 
-    # st.write("--- %s seconds table_chart_one ---" % (time.time() - start_time))
-
-    # #percent_table=table_percent(selected_pct) #percent table
-    # start_time = time.time()
-    # percent_table=table_percent(group_df)
-    # st.write("--- %s seconds table_percent ---" % (time.time() - start_time))
-
-    # start_time = time.time()
-    # download_df=download_data(group_df,percent_table)#download data
-    # st.write("--- %s seconds download_data ---" % (time.time() - start_time))
-
-    # start_time = time.time()
-    # expander_df= expander(filter)
-    # st.write("--- %s seconds expander---" % (time.time() - start_time))
+    # filter = filter_sidebar(data) #Read dataset
+    # group_df=group_data_year(filter) #Apply Filter
+    # selected_pct= percent_chart(group_df) #Create groupby dataset
+    # show_table=table_chart_one(group_df) #Table dollars 
+    # percent_table=table_percent(group_df) #Percent Table
+    # download_df=download_data(group_df,percent_table)#Download data
+    #expander_df= expander(filter)#Create Expander
 
 
     st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. Location is based on vendor business address. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
