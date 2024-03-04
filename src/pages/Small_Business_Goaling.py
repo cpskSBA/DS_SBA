@@ -126,7 +126,6 @@ def percent_chart(year_df):
 # Create table by Year and dolcols
 #%%
 def table_chart_one(year_df):
-    st.write(year_df.head())
     year_df_chart=year_df.copy()
     year_df_chart[dolcols_rename]=year_df_chart[dolcols_rename].applymap(lambda x: '${:,.0f}'.format(x))
     year_df_chart=year_df_chart.set_index('FISCAL_YEAR')
