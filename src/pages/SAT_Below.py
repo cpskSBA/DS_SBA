@@ -45,9 +45,9 @@ def filter_sidebar(data):
     #data = data.dropna(subset=["FUNDING_AGENCY_NAME",]).sort_values('VENDOR_ADDRESS_STATE_NAME')
 
     #Create filter for State and SBA Region and SBA DIstrict
-    filter_choice=st.sidebar.radio("Select Filter",["Funding Department(Default Governmentwide)","Funding Agency(Default Governmentwide)", "Contracting Department(Default Governmentwide)", "Contracting Agency(Default Governmentwide)"])
+    filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
     
-    if filter_choice == 'Funding Department(Default Governmentwide):':
+    if filter_choice == 'Funding Department':
         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
@@ -58,7 +58,7 @@ def filter_sidebar(data):
        
         data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
         
-    elif filter_choice == 'Funding Agency (Default Governmentwide):':
+    elif filter_choice == 'Funding Agency':
         codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
         f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
         
@@ -68,7 +68,7 @@ def filter_sidebar(data):
         
         data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
         
-    elif filter_choice == 'Contracting Department (Default Governmentwide):':
+    elif filter_choice == 'Contracting Department':
         codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
         c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
         
@@ -79,7 +79,7 @@ def filter_sidebar(data):
         data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
         
     else:
-         codes = st.sidebar.multiselect("Contracting Agency (Default Governmentwide):",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
+         codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
          c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
          
          f_agency_filter =True
@@ -99,7 +99,7 @@ def filter_sidebar(data):
         
         
     #Create a filter by fISCAL YEAR
-    year=st.sidebar.multiselect("Fiscal Year (Default All Years):", sorted(data3['FISCAL_YEAR'].dropna().unique()))
+    year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
     # if not year:
     #     data4=data3.copy()   
     # else:
