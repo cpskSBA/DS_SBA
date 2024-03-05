@@ -121,7 +121,6 @@ def table_chart_one(aggregated_df):
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
     aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
     aggregated_df_chart = aggregated_df_chart.sort_index()
-   #.sort_index(inplace=True)
     st.dataframe(aggregated_df_chart)
     return aggregated_df_chart
 
