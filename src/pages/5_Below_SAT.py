@@ -96,9 +96,8 @@ def FY_table(cols, selections):
             filters[col] = selections[col]
         else: filters[col] = ['total']
     dolcols_str = ', '.join([f'sum({dol}) as {dol}' for dol in dolcols])
-    where_str = ' and '.join([f'{k} in (%({k})s)' for k,v in filters.items()])
-    query = f"select NAICS, {dolcols_str} from {tb_name} where {where_str} group by NAICS order by 1"
-        
+    where_str = ' and '.join([f'{k} in (%({k})s)' for k,v in filters.items()]) #Not using this line of code
+    query = f"select NAICS, {dolcols_str} from {tb_name} where {where_str} group by NAICS order by 1"  
     FY_table = get_data(query, filters).set_index('NAICS').rename(columns=doldict)
     return FY_table
     
