@@ -102,14 +102,6 @@ def FY_table(cols, selections):
     return FY_table
     
 #%%
-def table_chart_one(year_df):
-    year_df_chart=year_df.copy()
-    year_df_chart[dolcols_rename]=year_df_chart[dolcols_rename].applymap(lambda x: '${:,.0f}'.format(x))
-    year_df_chart=year_df_chart
-    st.dataframe(year_df_chart)
-    return year_df_chart
-
-#%%
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
     # dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
