@@ -112,15 +112,14 @@ def table_chart_one(year_df):
 #%%
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
+    # dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
+    # n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
+    # per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
+    # aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
+    # aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
+    # aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
     
-    dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
-    n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
-    per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
-
-    aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
-    aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
-    aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
-    aggregated_df_chart = aggregated_df_chart.sort_index()
+    aggregated_df_chart = aggregated_df_chart.fillna(0).round().astype('Int64').sort_index()
     st.dataframe(aggregated_df_chart)
     return aggregated_df_chart
 
