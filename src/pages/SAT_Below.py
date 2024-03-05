@@ -1,252 +1,252 @@
-#%%
-import pandas as pd
-import streamlit as st
-import plotly.express as px
-import snowflake.snowpark as sp
-import warnings
-warnings.filterwarnings('ignore')
-import time
-from snowflake.snowpark.context import get_active_session
-import numpy as np
+# #%%
+# import pandas as pd
+# import streamlit as st
+# import plotly.express as px
+# import snowflake.snowpark as sp
+# import warnings
+# warnings.filterwarnings('ignore')
+# import time
+# from snowflake.snowpark.context import get_active_session
+# import numpy as np
 
 
-page_title= "Below SAT Purchases"
+# page_title= "Below SAT Purchases"
 
-st.set_page_config(
-    page_title=page_title,
-    page_icon="https://www.sba.gov/brand/assets/sba/img/pages/logo/logo.svg",
-    layout="wide",
-    initial_sidebar_state="expanded")
+# st.set_page_config(
+#     page_title=page_title,
+#     page_icon="https://www.sba.gov/brand/assets/sba/img/pages/logo/logo.svg",
+#     layout="wide",
+#     initial_sidebar_state="expanded")
 
-hide_streamlit_style = """
-             <style>
-             footer {visibility: hidden;}
-             </style>
-             """
+# hide_streamlit_style = """
+#              <style>
+#              footer {visibility: hidden;}
+#              </style>
+#              """
 
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-#%%
-@st.cache_data
-def get_data():
-    connection_parameters = st.secrets.snowflake_credentials
-    global session
-    session = sp.Session.builder.configs(connection_parameters).create()
-    data = session.table("TMP_BELOW_SAT_DASHBOARD_2")
-    data =data.to_pandas()
-    data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
-    return data, data_naics
+# #%%
+# @st.cache_data
+# def get_data():
+#     connection_parameters = st.secrets.snowflake_credentials
+#     global session
+#     session = sp.Session.builder.configs(connection_parameters).create()
+#     data = session.table("TMP_BELOW_SAT_DASHBOARD_2")
+#     data =data.to_pandas()
+#     data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
+#     return data, data_naics
 
-#%%
-def filter_sidebar(data):
-    st.sidebar.header("Choose Your Filter:")
-
-    # Create filter options
-    filter_options = {
-        'Funding Department': 'FUNDING_DEPARTMENT_NAME',
-        'Funding Agency': 'FUNDING_AGENCY_NAME',
-        'Contracting Department': 'CONTRACTING_DEPARTMENT_NAME',
-        'Contracting Agency': 'CONTRACTING_AGENCY_NAME'
-    }
-
-    # Choose filter
-    filter_choice = st.sidebar.radio("Select Filter (Default Governmentwide)", list(filter_options.keys()))
-    filter_column = filter_options[filter_choice]
-
-    # Filter data based on selected filter
-    selected_values = st.sidebar.multiselect(filter_choice, sorted(data[filter_column].dropna().unique()))
-    filter_condition = data[filter_column].isin(selected_values)
-    filtered_data = data[filter_condition] if selected_values else data
-
-    # Filter by Competition
-    competition = st.sidebar.multiselect("Competition", sorted(filtered_data['SET_ASIDE'].dropna().unique()))
-    filtered_data = filtered_data[filtered_data['SET_ASIDE'].isin(competition)] if competition else filtered_data
-
-    # Filter by Fiscal Year
-    fiscal_year = st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(filtered_data['FISCAL_YEAR'].dropna().unique()))
-    filtered_data = filtered_data[filtered_data['FISCAL_YEAR'].isin(fiscal_year)] if fiscal_year else filtered_data
-
-    return filtered_data
-
+# #%%
 # def filter_sidebar(data):
-#     st.sidebar.header("Choose Your Filter: ")
+#     st.sidebar.header("Choose Your Filter:")
+
+#     # Create filter options
+#     filter_options = {
+#         'Funding Department': 'FUNDING_DEPARTMENT_NAME',
+#         'Funding Agency': 'FUNDING_AGENCY_NAME',
+#         'Contracting Department': 'CONTRACTING_DEPARTMENT_NAME',
+#         'Contracting Agency': 'CONTRACTING_AGENCY_NAME'
+#     }
+
+#     # Choose filter
+#     filter_choice = st.sidebar.radio("Select Filter (Default Governmentwide)", list(filter_options.keys()))
+#     filter_column = filter_options[filter_choice]
+
+#     # Filter data based on selected filter
+#     selected_values = st.sidebar.multiselect(filter_choice, sorted(data[filter_column].dropna().unique()))
+#     filter_condition = data[filter_column].isin(selected_values)
+#     filtered_data = data[filter_condition] if selected_values else data
+
+#     # Filter by Competition
+#     competition = st.sidebar.multiselect("Competition", sorted(filtered_data['SET_ASIDE'].dropna().unique()))
+#     filtered_data = filtered_data[filtered_data['SET_ASIDE'].isin(competition)] if competition else filtered_data
+
+#     # Filter by Fiscal Year
+#     fiscal_year = st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(filtered_data['FISCAL_YEAR'].dropna().unique()))
+#     filtered_data = filtered_data[filtered_data['FISCAL_YEAR'].isin(fiscal_year)] if fiscal_year else filtered_data
+
+#     return filtered_data
+
+# # def filter_sidebar(data):
+# #     st.sidebar.header("Choose Your Filter: ")
    
-#     #Create filter for State and SBA Region and SBA DIstrict
-#     filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
+# #     #Create filter for State and SBA Region and SBA DIstrict
+# #     filter_choice=st.sidebar.radio("Select Filter (Default Governmentwide)",["Funding Department","Funding Agency","Contracting Department", "Contracting Agency"])
     
-#     if filter_choice == 'Funding Department':
-#         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
-#         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
-#         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
+# #     if filter_choice == 'Funding Department':
+# #         codes=st.sidebar.multiselect('Funding Department', sorted(data['FUNDING_DEPARTMENT_NAME'].dropna().unique()))
+# #         f_dept_filter =data['FUNDING_DEPARTMENT_NAME'].isin(codes)
+# #         f_dept_filter_naics=data[f_dept_filter]['NAICS'].unique()
 
-#         f_agency_filter =True
-#         c_dept_filter =True
-#         c_agency_filter = True
+# #         f_agency_filter =True
+# #         c_dept_filter =True
+# #         c_agency_filter = True
        
-#         data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
+# #         data2=data.copy() if not f_dept_filter.any() else data[data["FUNDING_DEPARTMENT_NAME"].isin(codes)]
         
-#     elif filter_choice == 'Funding Agency':
-#         codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
-#         f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
+# #     elif filter_choice == 'Funding Agency':
+# #         codes=st.sidebar.multiselect('Funding Agency', sorted(data['FUNDING_AGENCY_NAME'].dropna().unique()))
+# #         f_agency_filter =data['FUNDING_AGENCY_NAME'].isin(codes)
         
-#         f_dept_filter =True
-#         c_dept_filter =True
-#         c_agency_filter = True
+# #         f_dept_filter =True
+# #         c_dept_filter =True
+# #         c_agency_filter = True
         
-#         data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
+# #         data2=data.copy() if not f_agency_filter.any() else data[data["FUNDING_AGENCY_NAME"].isin(codes)]
         
-#     elif filter_choice == 'Contracting Department':
-#         codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
-#         c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
+# #     elif filter_choice == 'Contracting Department':
+# #         codes=st.sidebar.multiselect('Contracting Department',sorted(data['CONTRACTING_DEPARTMENT_NAME'].dropna().unique()))
+# #         c_dept_filter =data['CONTRACTING_DEPARTMENT_NAME'].isin(codes)
         
-#         f_agency_filter =True
-#         f_dept_filter =True
-#         c_agency_filter = True
+# #         f_agency_filter =True
+# #         f_dept_filter =True
+# #         c_agency_filter = True
         
-#         data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
+# #         data2=data.copy() if not c_dept_filter.any() else data[data["CONTRACTING_DEPARTMENT_NAME"].isin(codes)]
         
-#     else:
-#          codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
-#          c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
+# #     else:
+# #          codes = st.sidebar.multiselect("Contracting Agency",sorted(data['CONTRACTING_AGENCY_NAME'].dropna().unique()))
+# #          c_agency_filter =data['CONTRACTING_AGENCY_NAME'].isin(codes)
          
-#          f_agency_filter =True
-#          f_dept_filter =True
-#          c_dept_filter = True
+# #          f_agency_filter =True
+# #          f_dept_filter =True
+# #          c_dept_filter = True
          
-#          data2=data.copy() if not c_agency_filter.any() else data[data["CONTRACTING_AGENCY_NAME"].isin(codes)]
+# #          data2=data.copy() if not c_agency_filter.any() else data[data["CONTRACTING_AGENCY_NAME"].isin(codes)]
         
     
-#     #Create a Filter by Competition
-#     competition=st.sidebar.multiselect("Competition", sorted(data2['SET_ASIDE'].dropna().unique()))
+# #     #Create a Filter by Competition
+# #     competition=st.sidebar.multiselect("Competition", sorted(data2['SET_ASIDE'].dropna().unique()))
     
-#     if not competition:
-#         data3=data2.copy()   
-#     else:
-#         data3=data2[data2["SET_ASIDE"].isin(competition)]
+# #     if not competition:
+# #         data3=data2.copy()   
+# #     else:
+# #         data3=data2[data2["SET_ASIDE"].isin(competition)]
         
         
-#     #Create a filter by fISCAL YEAR
-#     year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
+# #     #Create a filter by fISCAL YEAR
+# #     year=st.sidebar.multiselect("Fiscal Year (Default All Years)", sorted(data3['FISCAL_YEAR'].dropna().unique()))
 
-#     #Create filter for State, Depatrment and Agency
-#     #NO selection
-#     if not codes and not competition and not year:
-#         show_df=data
+# #     #Create filter for State, Depatrment and Agency
+# #     #NO selection
+# #     if not codes and not competition and not year:
+# #         show_df=data
 
-#     #1 Selection
-#     #Select State
-#     elif not competition and not year:
-#         show_df = data[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter]
-#     #Select Department
-#     elif not codes and not competition:
-#         show_df = data[data["FISCAL_YEAR"].isin(year)]
-#     #Select Agency
-#     elif not codes and not year:
-#         show_df = data[data["SET_ASIDE"].isin(competition)]
-#     #Select award type
-#     elif not codes and not competition and not year:
-#         show_df = data[data["AWARD_TYPE"].isin(year)]
+# #     #1 Selection
+# #     #Select State
+# #     elif not competition and not year:
+# #         show_df = data[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter]
+# #     #Select Department
+# #     elif not codes and not competition:
+# #         show_df = data[data["FISCAL_YEAR"].isin(year)]
+# #     #Select Agency
+# #     elif not codes and not year:
+# #         show_df = data[data["SET_ASIDE"].isin(competition)]
+# #     #Select award type
+# #     elif not codes and not competition and not year:
+# #         show_df = data[data["AWARD_TYPE"].isin(year)]
 
-#     #All selection
-#     elif codes and competition and year:
-#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
+# #     #All selection
+# #     elif codes and competition and year:
+# #         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)& data3['FISCAL_YEAR'].isin(year)]
 
-#     #2 selections
-#         #Codes
-#     elif codes and competition:
-#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)]
+# #     #2 selections
+# #         #Codes
+# #     elif codes and competition:
+# #         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['SET_ASIDE'].isin(competition)]
 
-#     elif codes and year:
-#         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
+# #     elif codes and year:
+# #         show_df = data3[f_dept_filter & f_agency_filter & c_dept_filter & c_agency_filter & data3['FISCAL_YEAR'].isin(year)]
     
-#     return show_df 
+# #     return show_df 
     
-#%%
-def group_data_naics(show_df):
+# #%%
+# def group_data_naics(show_df):
 
-    grouped = show_df.groupby('NAICS')
+#     grouped = show_df.groupby('NAICS')
 
-# Define a function to calculate the aggregated values for each NAICS group 
-    def calculate_aggregates(group):
-    # Total Awards under SAT
-        total_awards_sat = len(group)
+# # Define a function to calculate the aggregated values for each NAICS group 
+#     def calculate_aggregates(group):
+#     # Total Awards under SAT
+#         total_awards_sat = len(group)
 
-        # Total Aggregate Dollars under SAT
-        total_dollars_sat = group['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
+#         # Total Aggregate Dollars under SAT
+#         total_dollars_sat = group['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
 
-        # Percentage of orders that are not set aside under the SAT
-        total_not_set_aside = group[group['SET_ASIDE'] == 'NOT A SET ASIDE']
-        percentage_orders_not_set_aside = (len(total_not_set_aside) / total_awards_sat) * 100 if total_awards_sat > 0 else 0
+#         # Percentage of orders that are not set aside under the SAT
+#         total_not_set_aside = group[group['SET_ASIDE'] == 'NOT A SET ASIDE']
+#         percentage_orders_not_set_aside = (len(total_not_set_aside) / total_awards_sat) * 100 if total_awards_sat > 0 else 0
          
-        # Percentage of dollars on orders that are not set aside under the SAT
-        dollars_not_set_aside = total_not_set_aside['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
-        percentage_dollars_not_set_aside = (dollars_not_set_aside / total_dollars_sat) * 100 if total_dollars_sat > 0 else 0
+#         # Percentage of dollars on orders that are not set aside under the SAT
+#         dollars_not_set_aside = total_not_set_aside['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
+#         percentage_dollars_not_set_aside = (dollars_not_set_aside / total_dollars_sat) * 100 if total_dollars_sat > 0 else 0
 
-        # Awards under SAT to Small Business
-        small_business_awards = group[group['CO_BUS_SIZE_DETERMINATION'] == 'SMALL BUSINESS']
-        small_business_awards_count = len(small_business_awards)
-        small_business_dollars = small_business_awards['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
+#         # Awards under SAT to Small Business
+#         small_business_awards = group[group['CO_BUS_SIZE_DETERMINATION'] == 'SMALL BUSINESS']
+#         small_business_awards_count = len(small_business_awards)
+#         small_business_dollars = small_business_awards['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
 
-        # Awards under SAT to Other Than Small Business
-        other_than_small_business_awards = group[group['CO_BUS_SIZE_DETERMINATION'] == 'OTHER THAN SMALL BUSINESS']
-        other_than_small_business_awards_count = len(other_than_small_business_awards)
-        other_than_small_business_dollars = other_than_small_business_awards['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
+#         # Awards under SAT to Other Than Small Business
+#         other_than_small_business_awards = group[group['CO_BUS_SIZE_DETERMINATION'] == 'OTHER THAN SMALL BUSINESS']
+#         other_than_small_business_awards_count = len(other_than_small_business_awards)
+#         other_than_small_business_dollars = other_than_small_business_awards['TOTAL_SB_ACT_ELIGIBLE_DOLLARS'].sum()
 
-        return pd.Series({
-            'Total # Awards': total_awards_sat,
-            'Total Aggregated $': total_dollars_sat,
-            '% Orders NOT SET ASIDE': percentage_orders_not_set_aside,
-            '% $ NOT SET ASIDE': percentage_dollars_not_set_aside,
+#         return pd.Series({
+#             'Total # Awards': total_awards_sat,
+#             'Total Aggregated $': total_dollars_sat,
+#             '% Orders NOT SET ASIDE': percentage_orders_not_set_aside,
+#             '% $ NOT SET ASIDE': percentage_dollars_not_set_aside,
             
-            '# Small Business Awards': small_business_awards_count,
-            'Small Business Awarded $': small_business_dollars,
+#             '# Small Business Awards': small_business_awards_count,
+#             'Small Business Awarded $': small_business_dollars,
             
-            'Other Than Small Business # Awards': other_than_small_business_awards_count,
-            'Other Than Small Business Awarded $': other_than_small_business_dollars
-        })
+#             'Other Than Small Business # Awards': other_than_small_business_awards_count,
+#             'Other Than Small Business Awarded $': other_than_small_business_dollars
+#         })
 
-    # Apply the function to each group and concatenate the results 
-    aggregated_df = grouped.apply(calculate_aggregates).reset_index()
+#     # Apply the function to each group and concatenate the results 
+#     aggregated_df = grouped.apply(calculate_aggregates).reset_index()
 
-# Return the aggregated DataFrame
-    return aggregated_df
+# # Return the aggregated DataFrame
+#     return aggregated_df
 
-def table_chart_one(aggregated_df):
-    aggregated_df_chart=aggregated_df.copy()
+# def table_chart_one(aggregated_df):
+#     aggregated_df_chart=aggregated_df.copy()
     
-    dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
-    n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
-    per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
+#     dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
+#     n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
+#     per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
 
-    aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
-    aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
-    aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
+#     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
+#     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
+#     aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
     
-    aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
-    st.dataframe(aggregated_df_chart)
-    #st.download_button(label="Download Data", data = aggregated_df_chart)
-    return aggregated_df_chart
+#     aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
+#     st.dataframe(aggregated_df_chart)
+#     #st.download_button(label="Download Data", data = aggregated_df_chart)
+#     return aggregated_df_chart
 
-def table_chart_two(data_naics):
-    data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
-    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').set_index('NAICS').sort_values("NAICS")
-    st.subheader('Count of Vendors by NAICS Code Governmentwide')
-    st.dataframe(data_naics)
-    #st.download_button(label="Download Data", data = data_naics)
-    return data_naics
+# def table_chart_two(data_naics):
+#     data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
+#     data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').set_index('NAICS').sort_values("NAICS")
+#     st.subheader('Count of Vendors by NAICS Code Governmentwide')
+#     st.dataframe(data_naics)
+#     #st.download_button(label="Download Data", data = data_naics)
+#     return data_naics
 
-if __name__ == "__main__":
-    st.header(page_title)
-    data,data_naics = get_data()
-    filter = filter_sidebar(data)
-    group_df=group_data_naics(filter)
-    table=table_chart_one(group_df)
-    table_two=table_chart_two(data_naics)
+# if __name__ == "__main__":
+#     st.header(page_title)
+#     data,data_naics = get_data()
+#     filter = filter_sidebar(data)
+#     group_df=group_data_naics(filter)
+#     table=table_chart_one(group_df)
+#     table_two=table_chart_two(data_naics)
 
-st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
-An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
-Abbreviations: Total # Awards - Count of total awards given under the NAICS code, Total Aggregated Dollars - Sum of dollars under the NAICS code, % of Orders NOT SET ASIDE - Percent of orders that are NOT A SET ASIDE under the NAICS code, 
-           % Dollars NOT SET ASIDE - Percent of dollars that are NOT A SET ASIDE under the NAICS Code, # Small Buiness Awards - Count of awards given to small business under the NAICS Code, Small Business Awarded Dollars - Sum of dollars awared to Small Business under the NAICS code, 
-           Other Than Small Business # Awards - Count of awards given to other than small business under the NAICS Code, Other Than Small Business Awarded Dollars - Sum of dollars awared to other than small business under the NAICS Code.""")
+# st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
+# An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
+# Abbreviations: Total # Awards - Count of total awards given under the NAICS code, Total Aggregated Dollars - Sum of dollars under the NAICS code, % of Orders NOT SET ASIDE - Percent of orders that are NOT A SET ASIDE under the NAICS code, 
+#            % Dollars NOT SET ASIDE - Percent of dollars that are NOT A SET ASIDE under the NAICS Code, # Small Buiness Awards - Count of awards given to small business under the NAICS Code, Small Business Awarded Dollars - Sum of dollars awared to Small Business under the NAICS code, 
+#            Other Than Small Business # Awards - Count of awards given to other than small business under the NAICS Code, Other Than Small Business Awarded Dollars - Sum of dollars awared to other than small business under the NAICS Code.""")
 
 
