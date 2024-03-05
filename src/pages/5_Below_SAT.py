@@ -120,8 +120,8 @@ def table_chart_one(aggregated_df):
     aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
     aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
     aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
-    
-    #aggregated_df_chart=aggregated_df_chart.sort_values('NAICS').set_index('NAICS')
+    aggregated_df_chart = aggregated_df_chart.sort_index()
+   #.sort_index(inplace=True)
     st.dataframe(aggregated_df_chart)
     return aggregated_df_chart
 
@@ -136,7 +136,7 @@ def get_data_naics():
 
 def table_chart_two(data_naics):
     data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
-    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').set_index('NAICS').sort_values("NAICS")
+    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').sort_values("NAICS").set_index('NAICS')
     st.subheader('Count of Vendors by NAICS Code Governmentwide')
     st.dataframe(data_naics)
     return data_naics
