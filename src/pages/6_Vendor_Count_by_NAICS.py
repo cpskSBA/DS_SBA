@@ -8,7 +8,7 @@ import numpy as np
 from snowflake.connector import connect
 import snowflake.snowpark as sp
 
-page_title= "Vendor Count by NAICS Code"
+page_title= "Vendor Count by NAICS Code Governmentwide"
 
 st.set_page_config(
     page_title=page_title,
@@ -36,7 +36,7 @@ def get_data_naics():
 def table_chart_two(data_naics):
     #data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
     data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').sort_values("NAICS").set_index('NAICS')
-    st.subheader('Count of Vendors by NAICS Code Governmentwide')
+    #st.subheader('Count of Vendors by NAICS Code Governmentwide')
     st.dataframe(data_naics)
     return data_naics
 
@@ -44,3 +44,6 @@ if __name__ == "__main__":
     st.header(page_title)
     data_naics = get_data_naics()
     table_two=table_chart_two(data_naics)
+
+st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.n\
+           Abbreviations: SDB - Small Disadvantaged Business""")
