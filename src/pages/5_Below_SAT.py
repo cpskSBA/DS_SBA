@@ -77,16 +77,24 @@ def filter_sidebar(filters, linked_cols):
     selections = {}
     for filter in filters.keys():
         if (filter != 'NAICS') and (filter not in linked_cols.keys()):
-            selections[filter] = st.sidebar.multiselect(filter.replace('_',' '), sorted(filters[filter]))
+            if filter == 'FISCAL_YEAR':
+                options = sorted(filters[filter])
+                # Set the last year as default
+                default_year = options[-1] if options else None
+                selections[filter] = st.sidebar.multiselect(filter.replace('_',' '), options, default=default_year)
+            else:
+                selections[filter] = st.sidebar.multiselect(filter.replace('_',' '), sorted(filters[filter]))
         elif filter in linked_cols.keys():
             selections[filter] = st.sidebar.multiselect(filter.replace('_',' '), sorted(filters[filter].keys()))
             if len(selections[filter]) == 1:
                 options=sorted(filters[filter][selections[filter][0]])
-            else: options=[]
-            selections[linked_cols[filter]] = st.sidebar.multiselect(linked_cols[filter].replace('_',' '), 
+            else: 
+                options=[]
+            selections[linked_cols[filter]] = st.sidebar.multiselect(linked_cols[filter].replace('_',' '),
                                                                      options,
                                                                      disabled = len(options)==0)
     return selections
+
 
 def FY_table(cols, selections):
     cols_small = [col for col in cols if col not in dolcols and col != 'NAICS']
@@ -104,14 +112,6 @@ def FY_table(cols, selections):
 #%%
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
-
-    # dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
-    # n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
-    # per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
-    # aggregated_df_chart[dollars_cols]=aggregated_df_chart[dollars_cols].applymap(lambda x: '${:,.0f}'.format(x))
-    # aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
-    # aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
-    
     aggregated_df_chart = aggregated_df_chart.fillna(0).round().sort_index() #.astype('Int64')
 
     cols_to_sum=[col for col in aggregated_df_chart.columns if '%' not in col]
@@ -141,12 +141,17 @@ if __name__ == "__main__":
     filters = get_filters(cols, linked_cols)
     sorted_filters= sort_filter(filters,column_order)
     
+    # Ensure default value for FISCAL_YEAR is set to the last year
+    if 'FISCAL_YEAR' in filters:
+        default_year = filters['FISCAL_YEAR'][-1] if filters['FISCAL_YEAR'] else None
+        filters['FISCAL_YEAR'].sort()
+
     selections = filter_sidebar(sorted_filters, linked_cols)
     FY_table = FY_table(cols, selections)
     table_chart_one(FY_table)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
-An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
+The Simplified Acquisition Threshold (SAT) is $250,000. An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
 Abbreviations: Total # Awards - Count of total awards given under the NAICS code, Total Aggregated Dollars - Sum of dollars under the NAICS code, % of Orders NOT SET ASIDE - Percent of orders that are NOT A SET ASIDE under the NAICS code, 
            % Dollars NOT SET ASIDE - Percent of dollars that are NOT A SET ASIDE under the NAICS Code, # Small Buiness Awards - Count of awards given to small business under the NAICS Code, Small Business Awarded Dollars - Sum of dollars awared to Small Business under the NAICS code, 
            Other Than Small Business # Awards - Count of awards given to other than small business under the NAICS Code, Other Than Small Business Awarded Dollars - Sum of dollars awared to other than small business under the NAICS Code.""")
