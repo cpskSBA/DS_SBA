@@ -27,9 +27,9 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 #%%
 # Columns for numbers dollar amountsm and percentage
-dolcols=["TOTAL_AWARDS","TOTAL_AGGREGATED_DOLLARS","PERCENTAGE_ORDERS_NOT_SET_ASIDE","PERCENTAGE_DOLLARS_NOT_SET_ASIDE","SMALL_BUSINESS_AWARDS_COUNT","SMALL_BUSINESS_AWARDED_DOLLARS","OTHER_THAN_SMALL_BUSINESS_AWARDS_COUNT","OTHER_THAN_SMALL_BUSINESS_AWARDED_DOLLARS"]
+dolcols=["TOTAL_AWARDS","TOTAL_AGGREGATED_DOLLARS","PERCENTAGE_ORDERS_NOT_SET_ASIDE","PERCENTAGE_DOLLARS_NOT_SET_ASIDE","SMALL_BUSINESS_AWARDS_COUNT","PERCENTAGE_ORDERS_SMALL_BUSINESS","SMALL_BUSINESS_AWARDED_DOLLARS","PERCENTAGE_DOLLARS_AWARDED_SMALL_BUSINESS","OTHER_THAN_SMALL_BUSINESS_AWARDS_COUNT","OTHER_THAN_SMALL_BUSINESS_AWARDED_DOLLARS"]
 # Mapping the renaming of the dollar amount columns
-dolcols_rename=["Total # Awards","Total Aggregated $","% Orders NOT SET ASIDE","% $ NOT SET ASIDE","# Small Business Awards","Small Business Awarded $","Other Than Small Business # Awards","Other Than Small Business Awarded $"]
+dolcols_rename=["Total # Awards","Total Aggregated $","% Orders NOT SET ASIDE","% $ NOT SET ASIDE","# Small Business Awards","% Small Business Awards","Small Business Awarded $","% Small Business Awarded $","Other Than Small Business # Awards","Other Than Small Business Awarded $"]
 doldict = {k:v for k,v in zip(dolcols, dolcols_rename)}
 
 tb_name = 'BELOW_SAT_DASHBOARD_VIEW'
@@ -104,6 +104,7 @@ def FY_table(cols, selections):
 #%%
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
+
     # dollars_cols=['Total Aggregated $','Small Business Awarded $','Other Than Small Business Awarded $']
     # n_cols= ['Total # Awards','# Small Business Awards','Other Than Small Business # Awards']
     # per_cols= ['% Orders NOT SET ASIDE','% $ NOT SET ASIDE']
@@ -111,25 +112,26 @@ def table_chart_one(aggregated_df):
     # aggregated_df_chart[n_cols]=aggregated_df_chart[n_cols].applymap(lambda x: '{:,.0f}'.format(x))
     # aggregated_df_chart[per_cols]=aggregated_df_chart[per_cols].applymap(lambda x: '{:,.0f}%'.format(x))
     
-    aggregated_df_chart = aggregated_df_chart.fillna(0).round().astype('Int64').sort_index()
-    st.dataframe(aggregated_df_chart)
+    aggregated_df_chart = aggregated_df_chart.fillna(0).round().sort_index() #.astype('Int64')
+
+    cols_to_sum=[col for col in aggregated_df_chart.columns if '%' not in col]
+    cols_to_avg=[col for col in aggregated_df_chart.columns if '%' in col]
+    
+    total_row=pd.DataFrame(aggregated_df_chart[cols_to_sum].sum()).transpose()
+    avg_row=pd.DataFrame(aggregated_df_chart[cols_to_avg].mean().round()).transpose()
+
+    total_row.index=['Total']
+    avg_row.index=['Total']
+
+    total_avg_row =total_row.add(avg_row, fill_value=0)
+   
+    aggregated_df_chart = pd.concat([total_avg_row,aggregated_df_chart])
+    aggregated_df_chart.index.names = ['NAICS']    
+   
+    #st.data_editor(aggregated_df_chart,column_config={"Total Aggregated $": st.column_config.NumberColumn("Total Aggregated $(in USD)",help=" Sum of dollars under the NAICS code",format="$%d")})
+    
+    st.dataframe(aggregated_df_chart,use_container_width=True,column_order=("Total # Awards","Total Aggregated $","% Orders NOT SET ASIDE","% $ NOT SET ASIDE","# Small Business Awards","% Small Business Awards","Small Business Awarded $","% Small Business Awarded $","Other Than Small Business # Awards","Other Than Small Business Awarded $"))
     return aggregated_df_chart
-
-#%%
-@st.cache_data
-def get_data_naics():
-    connection_parameters = st.secrets.snowflake_credentials
-    global session
-    session = sp.Session.builder.configs(connection_parameters).create()
-    data_naics = session.table("NAICS_VENDOR_COUNT").to_pandas()
-    return data_naics
-
-def table_chart_two(data_naics):
-    data_naics['SB_PERCENT'] = data_naics['SB_PERCENT'].apply(lambda x: '{:,.2f}%'.format(x))
-    data_naics= data_naics.rename(columns={"SMALL_BUSINESS_COUNT":"# of Small Business Vendors","SDB_COUNT":"# of SDB Vendors","WOSB_COUNT":"# of Women-Owned Small Business Vendors","CER_HUBZONE_COUNT":"# of HUBZone Vendors", "SRDVOB_COUNT":"# of Service-Disabled Veteran-Owned Vendors", "EIGHT_A_PROCEDURE_COUNT":"# of 8(a) Vendors",'TOTAL_COUNT':'# of Total Vendors',"SB_PERCENT":"% of Small Business Vendors"}).dropna(subset='NAICS').sort_values("NAICS").set_index('NAICS')
-    st.subheader('Count of Vendors by NAICS Code Governmentwide')
-    st.dataframe(data_naics)
-    return data_naics
 
 if __name__ == "__main__":
     st.header(page_title)
@@ -142,8 +144,6 @@ if __name__ == "__main__":
     selections = filter_sidebar(sorted_filters, linked_cols)
     FY_table = FY_table(cols, selections)
     table_chart_one(FY_table)
-    data_naics = get_data_naics()
-    table_two=table_chart_two(data_naics)
 
 st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
 An award signifies a new award (i.e. Modification Number equals to 0 and where the IDV PIID is not null) for multiple award contracts and neither multiple nor single award contracts. Multiple Award Contracts include (FSS, GWAC, or multiple award IDC).\n
