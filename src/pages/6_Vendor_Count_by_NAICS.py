@@ -44,5 +44,5 @@ if __name__ == "__main__":
     data_naics = get_data_naics()
     table_two=table_chart_two(data_naics)
 
-st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.n\
+st.caption("""Source: SBA Small Business Goaling Reports, FY10-FY22. This data does not apply double-credit adjustments and will not match up with the SBA small-business scorecard.\n
            Abbreviations: SDB - Small Disadvantaged Business""")
