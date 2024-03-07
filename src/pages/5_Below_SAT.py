@@ -124,7 +124,7 @@ def table_chart_one(aggregated_df):
     total_row.index=['Total']
     avg_row.index=['Total']
 
-    total_avg_row =total_row.add(avg_row, fill_value=0)
+    total_avg_row =total_row.add(avg_row,fill_value=0)
    
     aggregated_df_chart = pd.concat([total_avg_row,aggregated_df_chart])
     aggregated_df_chart.index.names = ['NAICS']    
