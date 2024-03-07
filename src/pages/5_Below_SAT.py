@@ -112,14 +112,15 @@ def FY_table(cols, selections):
 #%%
 def table_chart_one(aggregated_df):
     aggregated_df_chart=aggregated_df.copy()
-    aggregated_df_chart = aggregated_df_chart.fillna(0).round().sort_index() #.astype('Int64')
+    aggregated_df_chart = aggregated_df_chart.round().sort_index() #.astype('Int64').fillna(0)
 
-    cols_to_sum=[col for col in aggregated_df_chart.columns if '%' not in col]
-    cols_to_avg=[col for col in aggregated_df_chart.columns if '%' in col]
+    cols_to_sum=[col for col in aggregated_df_chart.columns if '%' not in col] #Selecting dollar columns
+    cols_to_avg=[col for col in aggregated_df_chart.columns if '%' in col] #Selecting percentage columns
     
     total_row=pd.DataFrame(aggregated_df_chart[cols_to_sum].sum()).transpose()
-    avg_row=pd.DataFrame(aggregated_df_chart[cols_to_avg].mean().round()).transpose()
-
+    avg_row=pd.DataFrame(aggregated_df_chart[cols_to_avg].replace(0, np.NaN).mean(skipna=True).round(2)).transpose()
+ 
+                    
     total_row.index=['Total']
     avg_row.index=['Total']
 
@@ -128,7 +129,18 @@ def table_chart_one(aggregated_df):
     aggregated_df_chart = pd.concat([total_avg_row,aggregated_df_chart])
     aggregated_df_chart.index.names = ['NAICS']    
    
-    #st.data_editor(aggregated_df_chart,column_config={"Total Aggregated $": st.column_config.NumberColumn("Total Aggregated $(in USD)",help=" Sum of dollars under the NAICS code",format="$%d")})
+    # column_config=[{
+    #     "Total # Awards": {st.column_config.NumberColumn(help= "Count of total awards given under the NAICS code")},
+    #     "Total Aggregated $": {st.column_config.NumberColumn("Total Aggregated $(in USD)",help="Sum of dollars under the NAICS code",format="$%d")},
+    #     "% Orders NOT SET ASIDE": {st.column_config.NumberColumn("% Orders NOT SET ASIDE",help="Percent of orders that are NOT A SET-ASIDE under the NAICS code",format="%%d")},
+    #     "% $ NOT SET ASIDE": {st.column_config.NumberColumn("% $ NOT SET ASIDE",help="Percent of dollars that are NOT A SET-ASIDE under the NAICS code",format="%%d")},
+    #     "# Small Business Awards": {st.column_config.NumberColumn("# Small Business Awards",help="Count of awards given to small business under the NAICS Code")},
+    #     "% Small Business Awards": {st.column_config.NumberColumn("% Small Business Awards",help="Percent of orders given to small business under the NAICS Code",format="%%d")},
+    #     "Small Business Awarded $": {st.column_config.NumberColumn("Small Business Awarded $(in USD)",help="Sum of dollars given to small business under the NAICS Code",format="$%d")},
+    #     "% Small Business Awarded $": {st.column_config.NumberColumn("% Small Business Awarded $",help="Percentage of dollars given to small business under the NAICS Code",format="%%d")},
+    #     "Other Than Small Business # Awards": {st.column_config.NumberColumn("Other Than Small Business # Awards",help="Count of awards given to other than small business under the NAICS Code")},
+    #     "Other Than Small Business Awarded $": {st.column_config.NumberColumn("Other Than Small Business Awarded $(in USD)",help="Sum of dollars given to other than small business under the NAICS Code",format="$%d")}
+    # }]
     
     st.dataframe(aggregated_df_chart,use_container_width=True,column_order=("Total # Awards","Total Aggregated $","% Orders NOT SET ASIDE","% $ NOT SET ASIDE","# Small Business Awards","% Small Business Awards","Small Business Awarded $","% Small Business Awarded $","Other Than Small Business # Awards","Other Than Small Business Awarded $"))
     return aggregated_df_chart
